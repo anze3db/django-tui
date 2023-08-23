@@ -9,13 +9,21 @@ description = 'Inspect and run Django Commands in a text-based user interface (T
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
-keywords = []
+keywords = [
+  "django",
+  "tui",
+  "textual"
+]
 authors = [
   { name = "Anže Pečar", email = "anze@pecar.me" },
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Framework :: Django",
+  "Framework :: Django :: 3.2",
+  "Framework :: Django :: 4.0",
+  "Framework :: Django :: 4.1",
+  "Framework :: Django :: 4.2",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
