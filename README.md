@@ -18,13 +18,13 @@ Inspect and run Django Commands in a text-based user interface (TUI), built with
 pip install django-tui
 ```
 
-Add "words_tui" to your INSTALLED_APPS setting like this:
+Add "django_tui" to your INSTALLED_APPS setting like this:
 
 
 ```python
     INSTALLED_APPS = [
         ...,
-        "words_tui",
+        "django_tui",
     ]
 ```
 
