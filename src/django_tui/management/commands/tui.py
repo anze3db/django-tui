@@ -25,11 +25,7 @@ from textual.widgets import (
     Tree,
 )
 from textual.widgets.tree import TreeNode
-from trogon.introspect import (
-    CommandSchema,
-    MultiValueParamData,
-    OptionSchema,
-)
+from trogon.introspect import ArgumentSchema, CommandSchema, MultiValueParamData, OptionSchema
 from trogon.run_command import UserCommandData
 from trogon.widgets.command_info import CommandInfo
 from trogon.widgets.command_tree import CommandTree
@@ -48,6 +44,7 @@ def introspect_django_commands() -> dict[str, CommandSchema]:
 
         parser = kls.create_parser(f"django {name}", name)
         options = []
+        args = []
         root = []
         for action in parser._actions:
             if action.nargs == "?":
@@ -59,7 +56,6 @@ def introspect_django_commands() -> dict[str, CommandSchema]:
             else:
                 nargs = action.nargs
 
-            option_name = action.option_strings[0] if action.option_strings else action.dest
             if hasattr(action, "type"):
                 if action.type is bool:
                     type_ = click.BOOL
@@ -74,19 +70,37 @@ def introspect_django_commands() -> dict[str, CommandSchema]:
 
             default = action.default
             if default is None:
-                default = ""
-            if type_ is click.BOOL:
-                default = None
+                default = MultiValueParamData([])
+            elif type_ is click.BOOL:
+                default = MultiValueParamData([])
+            else:
+                default = MultiValueParamData(values=[(default,)])
+
+            if not action.option_strings:
+                args.append(
+                    ArgumentSchema(
+                        name=action.metavar or action.dest,
+                        type=type_,
+                        required=action.required if action.nargs != "*" else False,
+                        default=default,
+                        choices=action.choices,
+                        multiple=action.nargs in ("+", "*"),
+                        nargs=nargs,
+                    )
+                )
+                continue
+            option_name = action.option_strings[0]
+
             schema = OptionSchema(
                 name=option_name,
                 type=type_,
                 help=action.help,
-                default=MultiValueParamData(values=[(default,)]),
+                default=default,
                 required=action.required,
                 multiple=action.nargs in ("+", "*"),
                 choices=action.choices,
-                is_flag=not action.nargs,
-                is_boolean_flag=not action.nargs,
+                is_flag=action.nargs == 0,
+                is_boolean_flag=action.nargs == 0,
                 nargs=nargs,
             )
             if option_name in (
@@ -113,6 +127,7 @@ def introspect_django_commands() -> dict[str, CommandSchema]:
             is_group=False,
             docstring=None,
             options=options,
+            arguments=args,
             parent=groups[group_name],
         )
 
