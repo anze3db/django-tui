@@ -27,6 +27,7 @@ from textual.widgets import (
 from textual.widgets.tree import TreeNode
 from trogon.introspect import ArgumentSchema, CommandSchema, MultiValueParamData, OptionSchema
 from trogon.run_command import UserCommandData
+from trogon.widgets.about import TextDialog
 from trogon.widgets.command_info import CommandInfo
 from trogon.widgets.command_tree import CommandTree
 from trogon.widgets.form import CommandForm
@@ -140,6 +141,24 @@ def introspect_django_commands() -> dict[str, CommandSchema]:
     return groups
 
 
+class AboutDialog(TextDialog):
+    DEFAULT_CSS = """
+    TextDialog > Vertical {
+        border: thick $primary 50%;
+    }
+    """
+
+    def __init__(self) -> None:
+        title = f"About django-tui"
+        message = Text.from_markup(
+            "Built with [@click=app.visit('https://github.com/textualize/textual')]Textual[/] & [@click=app.visit('https://github.com/textualize/trogon')]Trogon[/] "
+            "by [@click=app.visit('https://pecar.me')]Anže Pečar[/].\n\n"
+            "[@click=app.visit('https://github.com/anze3db/django-tui')]"
+            "https://github.com/anze3db/django-tui[/]",
+        )
+        super().__init__(title, message)
+
+
 class DjangoCommandBuilder(Screen):
     COMPONENT_CLASSES = {"version-string", "prompt", "command-name-syntax"}
 
@@ -230,8 +249,6 @@ class DjangoCommandBuilder(Screen):
         self.app.exit()
 
     def action_about(self) -> None:
-        from .widgets.about import AboutDialog
-
         self.app.push_screen(AboutDialog())
 
     async def on_mount(self, event: events.Mount) -> None:
