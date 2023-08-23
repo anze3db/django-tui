@@ -9,8 +9,14 @@ Inspect and run Django Commands in a text-based user interface (TUI), built with
 
 **Table of Contents**
 
+- [Demo](#demo)
 - [Installation](#installation)
+- [Running](#running)
 - [License](#license)
+
+## 🎬 Demo
+
+https://github.com/anze3db/django-tui/assets/513444/cdd2892b-2548-41c7-b8d5-0deff638a572
 
 ## Installation
 
