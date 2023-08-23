@@ -1,6 +1,6 @@
 # django-tui
 
-Inspect and run Django Commands in a text-based user interface (TUI), built with [Textual](https://github.com/Textualize/textual).
+Inspect and run Django Commands in a text-based user interface (TUI), built with [Textual](https://github.com/Textualize/textual) & [Trogon](https://github.com/Textualize/trogon).
 
 [![PyPI - Version](https://img.shields.io/pypi/v/django-tui.svg)](https://pypi.org/project/django-tui)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/django-tui.svg)](https://pypi.org/project/django-tui)
