@@ -36,7 +36,11 @@ from trogon.widgets.multiple_choice import NonFocusableVerticalScroll
 def introspect_django_commands() -> dict[str, CommandSchema]:
     groups = {}
     for name, app_name in get_commands().items():
-        kls = load_command_class(app_name, name)
+        try:
+            kls = load_command_class(app_name, name)
+        except AttributeError:
+            # Skip invalid commands
+            continue
         if app_name == "django.core":
             group_name = "django"
         else:
