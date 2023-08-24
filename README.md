@@ -28,7 +28,7 @@ https://github.com/anze3db/django-tui/assets/513444/cdd2892b-2548-41c7-b8d5-0def
 pip install django-tui
 ```
 
-Add `"django_tui"` to your `INSTALLED_APPS` setting like this:
+Add `"django_tui"` to your `INSTALLED_APPS` setting in `settings.py` like this:
 
 
 ```python
