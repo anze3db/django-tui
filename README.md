@@ -1,3 +1,7 @@
+
+![Screenshot 2023-08-24 at 07 55 10](https://github.com/anze3db/django-tui/assets/513444/85a9dad8-8a94-41e2-a7cf-51ac3834293f)
+
+
 # django-tui
 
 Inspect and run Django Commands in a text-based user interface (TUI), built with [Textual](https://github.com/Textualize/textual) & [Trogon](https://github.com/Textualize/trogon).
