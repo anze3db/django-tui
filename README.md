@@ -32,10 +32,10 @@ Add "django_tui" to your INSTALLED_APPS setting like this:
 
 
 ```python
-    INSTALLED_APPS = [
-        ...,
-        "django_tui",
-    ]
+INSTALLED_APPS = [
+    ...,
+    "django_tui",
+]
 ```
 
 Now you can run the TUI with:
