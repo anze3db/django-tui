@@ -1,3 +1,24 @@
+$django-color: rgb(12, 60, 38);
+$django-color-alternative: rgb(12, 75, 51);
+$django-color-lite: rgb(68, 183, 139);
+
+$primary-darken-3: $django-color-alternative;
+$primary-darken-2: $django-color-alternative;
+$primary-darken-1: $django-color-alternative;
+$primary: $django-color;
+$primary-lighten-1: $django-color-lite;
+$primary-lighten-2: $django-color-lite;
+$primary-lighten-3: $django-color-lite;
+
+$accent-darken-3: $django-color-alternative;
+$accent-darken-2: $django-color-alternative;
+$accent-darken-1: $django-color-alternative;
+$accent: $django-color;
+$accent-lighten-1: $django-color-lite;
+$accent-lighten-2: $django-color-lite;
+$accent-lighten-3: $django-color-lite;
+
+
 * {
     scrollbar-color: $accent-lighten-2 20%;
 }
