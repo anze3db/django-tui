@@ -1,6 +1,5 @@
 
-![Screenshot 2023-08-24 at 07 55 10](https://github.com/anze3db/django-tui/assets/513444/85a9dad8-8a94-41e2-a7cf-51ac3834293f)
-
+![Screenshot 2023-08-27 at 06 57 45](https://github.com/anze3db/django-tui/assets/513444/11321700-9f22-4aa0-ad2b-1c1ac03c4b29)
 
 # django-tui
 
@@ -20,7 +19,7 @@ Inspect and run Django Commands in a text-based user interface (TUI), built with
 
 ## 🎬 Demo
 
-https://github.com/anze3db/django-tui/assets/513444/cdd2892b-2548-41c7-b8d5-0deff638a572
+https://github.com/anze3db/django-tui/assets/513444/fc84247a-9f4b-4017-9ae4-3f10fe9d9557
 
 ## Installation
 
