@@ -43,6 +43,8 @@ Documentation = "https://github.com/anze3db/django-tui#readme"
 Issues = "https://github.com/anze3db/django-tui/issues"
 Source = "https://github.com/anze3db/django-tui"
 Changelog = "https://github.com/anze3db/django-tui/blob/main/CHANGELOG.md"
+Mastodon = "https://fosstodon.org/@anze3db"
+Twitter = "https://twitter.com/anze3db"
 
 [tool.hatch.version]
 path = "src/django_tui/__about__.py"
