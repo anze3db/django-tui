@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import os
 import shlex
+import sys
 from pathlib import Path
+from subprocess import run
 from typing import Any
 from webbrowser import open as open_url
 
@@ -164,6 +166,7 @@ class DjangoCommandBuilder(Screen):
 
     BINDINGS = [
         Binding(key="ctrl+r", action="close_and_run", description="Close & Run"),
+        Binding(key="ctrl+z", action="copy_command", description="Copy Command to Clipboard"),
         Binding(key="ctrl+t", action="focus_command_tree", description="Focus Command Tree"),
         # Binding(key="ctrl+o", action="show_command_info", description="Command Info"),
         Binding(key="ctrl+s", action="focus('search')", description="Search"),
@@ -247,6 +250,29 @@ class DjangoCommandBuilder(Screen):
     def action_close_and_run(self) -> None:
         self.app.execute_on_exit = True
         self.app.exit()
+
+    def action_copy_command(self) -> None:
+        if self.command_data is None:
+            return
+
+        if sys.platform == "win32":
+            copy_command = ["copy"]
+        elif sys.platform == "darwin":
+            copy_command = ["pbcopy"]
+        else:
+            copy_command = ["xclip", "-selection", "clipboard"]
+
+        try:
+            command = self.click_app_name + " " + " ".join(shlex.quote(str(x)) for x in self.command_data.to_cli_args())
+            run(
+                copy_command,
+                input=command,
+                text=True,
+                check=False,
+            )
+            self.notify(f"`{command}` copied to clipboard.")
+        except FileNotFoundError:
+            self.notify(f"Could not copy to clipboard. `{cmd[0]}` not found.", severity="error")
 
     def action_about(self) -> None:
         self.app.push_screen(AboutDialog())
