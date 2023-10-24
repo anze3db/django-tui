@@ -1,5 +1,5 @@
 
-![Screenshot 2023-08-27 at 06 57 45](https://github.com/anze3db/django-tui/assets/513444/11321700-9f22-4aa0-ad2b-1c1ac03c4b29)
+![Screenshot 2023-10-24 at 11 27 56](https://github.com/anze3db/django-tui/assets/513444/54bc6c84-267c-4e28-9d49-8b30391470ea)
 
 # django-tui
 
