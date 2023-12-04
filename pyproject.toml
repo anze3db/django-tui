@@ -29,6 +29,7 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
@@ -67,23 +68,22 @@ cov = [
 ]
 
 [[tool.hatch.envs.all.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11"]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.lint]
 detached = true
 dependencies = [
-  "black>=23.1.0",
   "mypy>=1.0.0",
-  "ruff>=0.0.243",
+  "ruff>=0.1.6",
 ]
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src/django_tui tests}"
 style = [
   "ruff {args:.}",
-  "black --check --diff {args:.}",
+  "ruff format --check {args:.}",
 ]
 fmt = [
-  "black {args:.}",
+  "ruff format {args:.}",
   "ruff --fix {args:.}",
   "style",
 ]
@@ -91,10 +91,6 @@ all = [
   "style",
   "typing",
 ]
-
-[tool.black]
-target-version = ["py38"]
-line-length = 120
 
 [tool.ruff]
 target-version = "py38"
