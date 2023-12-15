@@ -256,7 +256,7 @@ class DjangoCommandBuilder(Screen):
             return
 
         if sys.platform == "win32":
-            copy_command = ["copy"]
+            copy_command = ["clip"]
         elif sys.platform == "darwin":
             copy_command = ["pbcopy"]
         else:
@@ -272,7 +272,7 @@ class DjangoCommandBuilder(Screen):
             )
             self.notify(f"`{command}` copied to clipboard.")
         except FileNotFoundError:
-            self.notify(f"Could not copy to clipboard. `{cmd[0]}` not found.", severity="error")
+            self.notify(f"Could not copy to clipboard. `{copy_command[0]}` not found.", severity="error")
 
     def action_about(self) -> None:
         self.app.push_screen(AboutDialog())
