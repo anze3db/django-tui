@@ -256,7 +256,7 @@ class DjangoCommandBuilder(Screen):
             return
 
         if sys.platform == "win32":
-            copy_command = ["copy"]
+            copy_command = ["clip"]
         elif sys.platform == "darwin":
             copy_command = ["pbcopy"]
         else:
