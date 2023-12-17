@@ -171,6 +171,7 @@ class DjangoCommandBuilder(Screen):
         Binding(key="ctrl+t", action="focus_command_tree", description="Focus Command Tree"),
         # Binding(key="ctrl+o", action="show_command_info", description="Command Info"),
         Binding(key="ctrl+s", action="focus('search')", description="Search"),
+        Binding(key="q", action="back", description="Go Back"),
         Binding(key="f1", action="about", description="About"),
     ]
 
@@ -365,6 +366,10 @@ class HomeScreen(Screen):
 
 class DjangoTui(App):
     CSS_PATH = Path(__file__).parent / "trogon.scss"
+
+    # SCREENS = {
+    #     "home": HomeScreen,
+    # }
 
     def __init__(
         self,

@@ -293,7 +293,7 @@ class InteractiveShellScreen(Screen):
         Binding(key="ctrl+r", action="test", description="Run the query"),
         Binding(key="ctrl+z", action="copy_command", description="Copy to Clipboard"),
         Binding(key="f1", action="editor_keys", description="Key Bindings"),
-        Binding(key="q", action="quit", description="Quit"),
+        Binding(key="q", action="back", description="Go Back"),
     ]
 
     def compose(self) -> ComposeResult:
