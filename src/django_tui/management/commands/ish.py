@@ -284,8 +284,6 @@ class InteractiveShellScreen(Screen):
     ):
         super().__init__(name, id, classes)
 
-    CSS_PATH = "ish.tcss"
-
     input_tarea = ExtendedTextArea("", language="python", theme="dracula")
     output_tarea =  TextArea("# Output", language="python", theme="dracula",classes="text-area")
 

@@ -286,3 +286,11 @@ Select.command-form-select:focus SelectCurrent {
 
     border: tall $accent;
 }
+
+.text-area{
+    border-left: solid $accent;
+}
+
+.status_bar{
+    background: $primary-darken-3;
+}
