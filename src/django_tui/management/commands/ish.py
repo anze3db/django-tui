@@ -337,13 +337,12 @@ class ShellApp(App):
     def action_test(self) -> None:
         # get Code from start till the position of the cursor
         self.input_tarea.selection = Selection(start=(0, 0), end=self.input_tarea.cursor_location)
+        self.input_tarea.action_cursor_line_end()
         code = self.input_tarea.get_text_range(start=(0,0),end=self.input_tarea.cursor_location)
-
-        
 
         if len(code) > 0:
             # Because the cli - texualize is running on a loop - has an event loop
-            os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rest.settings')
+            # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rest.settings')
             os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
             django.setup()
 
