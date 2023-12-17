@@ -37,6 +37,7 @@ dependencies = [
   "django>=3.2",
   "textual",
   "trogon",
+  "textual[syntax]",
 ]
 
 [project.urls]

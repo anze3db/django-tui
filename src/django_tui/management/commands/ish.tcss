@@ -1,0 +1,7 @@
+.text-area{
+    border-left: solid rgb(28, 28, 109);
+}
+
+.status_bar{
+    background: blue;
+}
