@@ -160,7 +160,6 @@ class AboutDialog(TextDialog):
         )
         super().__init__(title, message)
 
-
 # 2 For the command screen
 class DjangoCommandBuilder(Screen):
     COMPONENT_CLASSES = {"version-string", "prompt", "command-name-syntax"}
@@ -368,7 +367,6 @@ class HomeScreen(Screen):
         self.notify("hello")
 
     def action_select_mode(self,mode_id:str) -> None:
-        self.notify(mode_id)
         if mode_id == "commands":
             self.app.push_screen(DjangoCommandBuilder("pyhton manage.py", "Test command name"))
 
@@ -382,7 +380,6 @@ class HomeScreen(Screen):
 
         elif event.button.id == "shell":
             self.app.push_screen(InteractiveShellScreen("Interactive Shell"))
-
 
 class DjangoTui(App):
     CSS_PATH = Path(__file__).parent / "trogon.scss"
@@ -452,7 +449,6 @@ class DjangoTui(App):
             url: The URL to visit.
         """
         open_url(url)
-
 
 class Command(BaseCommand):
     help = """Run and inspect Django commands in a text-based user interface (TUI)."""
