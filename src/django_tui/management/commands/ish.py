@@ -3,11 +3,9 @@ from __future__ import annotations
 import os
 import sys
 from subprocess import run
-from typing import Any
 
-from django.core.management import BaseCommand
 from textual import events
-from textual.app import App, ComposeResult
+from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical,HorizontalScroll
 from textual.widgets import (
@@ -24,7 +22,7 @@ from django.apps import apps
 
 from pprint import PrettyPrinter
 from textual.widgets.text_area import Selection
-from textual.screen import ModalScreen
+from textual.screen import ModalScreen,Screen
 from textual.widgets import MarkdownViewer
 
 try:
@@ -276,7 +274,16 @@ Text Editor Key Bindings List
         with Vertical():
             yield MarkdownViewer(self.key_bindings,classes="spaced",show_table_of_contents=False)
 
-class ShellApp(App):
+class InteractiveShellScreen(Screen):
+
+    def __init__(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+    ):
+        super().__init__(name, id, classes)
+
     CSS_PATH = "ish.tcss"
 
     input_tarea = ExtendedTextArea("", language="python", theme="dracula")
@@ -347,10 +354,3 @@ class ShellApp(App):
     def action_editor_keys(self) -> None:
         # self.notify(f"Selction:{self.input_tarea.BINDINGS}")
         self.app.push_screen(TextEditorBingingsInfo())
-
-class Command(BaseCommand):
-    help = """Run and inspect Django commands in a text-based user interface (TUI)."""
-
-    def handle(self, *args: Any, **options: Any) -> None:
-        app = ShellApp()
-        app.run()

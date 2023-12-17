@@ -25,6 +25,7 @@ from textual.widgets import (
     Label,
     Static,
     Tree,
+    Header,
 )
 from textual.widgets.tree import TreeNode
 from trogon.introspect import ArgumentSchema, CommandSchema, MultiValueParamData, OptionSchema
@@ -34,7 +35,7 @@ from trogon.widgets.command_info import CommandInfo
 from trogon.widgets.command_tree import CommandTree
 from trogon.widgets.form import CommandForm
 from trogon.widgets.multiple_choice import NonFocusableVerticalScroll
-
+from .ish import InteractiveShellScreen
 
 def introspect_django_commands() -> dict[str, CommandSchema]:
     groups = {}
@@ -142,7 +143,6 @@ def introspect_django_commands() -> dict[str, CommandSchema]:
 
     return groups
 
-
 class AboutDialog(TextDialog):
     DEFAULT_CSS = """
     TextDialog > Vertical {
@@ -161,6 +161,7 @@ class AboutDialog(TextDialog):
         super().__init__(title, message)
 
 
+# 2 For the command screen
 class DjangoCommandBuilder(Screen):
     COMPONENT_CLASSES = {"version-string", "prompt", "command-name-syntax"}
 
@@ -337,6 +338,30 @@ class DjangoCommandBuilder(Screen):
         if not self.is_grouped_cli:
             command_form.focus()
 
+# 1 The main screen
+class HomeScreen(Screen):
+    def __init__(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+    ):
+        super().__init__(name, id, classes)
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Button("Django Commands", id="commands", variant="success")
+        yield Button("Django Shell", id="shell", variant="error")
+        yield Footer()
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Event handler called when a button is pressed."""
+        if event.button.id == "commands":
+            self.app.push_screen(DjangoCommandBuilder("pyhton manage.py", "Test command name"))
+
+        elif event.button.id == "shell":
+            self.app.push_screen(InteractiveShellScreen("Interactive Shell"))
+
 
 class DjangoTui(App):
     CSS_PATH = Path(__file__).parent / "trogon.scss"
@@ -352,7 +377,8 @@ class DjangoTui(App):
         self.command_name = "django-tui"
 
     def on_mount(self):
-        self.push_screen(DjangoCommandBuilder(self.app_name, self.command_name))
+        # self.push_screen(DjangoCommandBuilder(self.app_name, self.command_name))
+        self.push_screen(HomeScreen(self.app_name))
 
     @on(Button.Pressed, "#home-exec-button")
     def on_button_pressed(self):
