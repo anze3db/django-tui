@@ -340,7 +340,6 @@ class DjangoCommandBuilder(Screen):
             command_form.focus()
 
 # 1 The main screen
-# BUG: in switching screen - the shell app stucks
 class HomeScreen(Screen):
 
     CSS = """
@@ -353,16 +352,16 @@ class HomeScreen(Screen):
     """
      
     BINDINGS = [
-        Binding(key="s", action="action_select_mode('shell')", description="Shell"),
-        Binding(key="c", action="action_select_mode('commands')", description="Commands"),
-        Binding(key="t", action="action_hello", description="Hello"),
+        Binding(key="s", action="select_mode('shell')", description="Shell"),
+        Binding(key="c", action="select_mode('commands')", description="Commands"),
+        Binding(key="t", action="hello", description="Hello"),
     ]
     
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield Button("Django Commands", id="commands", variant="success")
-        yield Button("Django Shell", id="shell", variant="error")
+        yield Button("C - Django Commands", id="commands", variant="success")
+        yield Button("S - Django Shell", id="shell", variant="error")
         yield Footer()
     
     def action_hello(self) -> None:
