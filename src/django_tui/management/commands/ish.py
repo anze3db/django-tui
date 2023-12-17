@@ -218,18 +218,24 @@ class TextEditorBingingsInfo(ModalScreen[None]):
     ]
 
     DEFAULT_CSS = """
-    MarkdownViewer {
+
+    TextEditorBingingsInfo {
         align: center middle;
     }
 
-    MarkdownViewer Center {
-        width: 80%;
+    #dialog {
+        grid-size: 2;
+        grid-gutter: 1 2;
+        grid-rows: 1fr 3;
+        padding: 0 1;
+        width: 90;
+        height: 20;
+        border: thick $background 80%;
+        background: $surface;
     }
 
-    MarkdownViewer > Vertical {
-        background: $boost;
-        min-width: 30%;
-        border: round blue;
+    Button {
+        width: 100%;
     }
 
 """
@@ -271,7 +277,7 @@ Text Editor Key Bindings List
 
     def compose(self) -> ComposeResult:
         """Compose the content of the modal dialog."""
-        with Vertical():
+        with Vertical(id="dialog"):
             yield MarkdownViewer(self.key_bindings,classes="spaced",show_table_of_contents=False)
 
 class InteractiveShellScreen(Screen):
@@ -283,18 +289,18 @@ class InteractiveShellScreen(Screen):
         classes: str | None = None,
     ):
         super().__init__(name, id, classes)
-
-    input_tarea = ExtendedTextArea("", language="python", theme="dracula")
-    output_tarea =  TextArea("# Output", language="python", theme="dracula",classes="text-area")
-
-    runner = Runner()
+        self.runner = Runner()
+        self.input_tarea = ExtendedTextArea("", language="python", theme="dracula")
+        self.output_tarea =  TextArea("# Output", language="python", theme="dracula",classes="text-area")
+    
 
     BINDINGS = [
         Binding(key="ctrl+r", action="test", description="Run the query"),
         Binding(key="ctrl+z", action="copy_command", description="Copy to Clipboard"),
         Binding(key="f1", action="editor_keys", description="Key Bindings"),
-        Binding(key="q", action="back", description="Go Back"),
+        ("escape", "app.back()", "Back")
     ]
+
 
     def compose(self) -> ComposeResult:
         self.input_tarea.focus()

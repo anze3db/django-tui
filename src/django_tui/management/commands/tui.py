@@ -171,7 +171,7 @@ class DjangoCommandBuilder(Screen):
         Binding(key="ctrl+t", action="focus_command_tree", description="Focus Command Tree"),
         # Binding(key="ctrl+o", action="show_command_info", description="Command Info"),
         Binding(key="ctrl+s", action="focus('search')", description="Search"),
-        Binding(key="q", action="back", description="Go Back"),
+        ("escape", "app.pop_screen", "Back"),
         Binding(key="f1", action="about", description="About"),
     ]
 
@@ -340,20 +340,41 @@ class DjangoCommandBuilder(Screen):
             command_form.focus()
 
 # 1 The main screen
+# BUG: in switching screen - the shell app stucks
 class HomeScreen(Screen):
-    def __init__(
-        self,
-        name: str | None = None,
-        id: str | None = None,
-        classes: str | None = None,
-    ):
-        super().__init__(name, id, classes)
+
+    CSS = """
+    Screen {
+        layout: grid;
+        grid-size: 2;
+        grid-gutter: 2;
+        padding: 2;
+    }
+    """
+     
+    BINDINGS = [
+        Binding(key="s", action="action_select_mode('shell')", description="Shell"),
+        Binding(key="c", action="action_select_mode('commands')", description="Commands"),
+        Binding(key="t", action="action_hello", description="Hello"),
+    ]
+    
 
     def compose(self) -> ComposeResult:
         yield Header()
         yield Button("Django Commands", id="commands", variant="success")
         yield Button("Django Shell", id="shell", variant="error")
         yield Footer()
+    
+    def action_hello(self) -> None:
+        self.notify("hello")
+
+    def action_select_mode(self,mode_id:str) -> None:
+        self.notify(mode_id)
+        if mode_id == "commands":
+            self.app.push_screen(DjangoCommandBuilder("pyhton manage.py", "Test command name"))
+
+        elif mode_id == "shell":
+            self.app.push_screen(InteractiveShellScreen("Interactive Shell"))
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Event handler called when a button is pressed."""
@@ -366,10 +387,6 @@ class HomeScreen(Screen):
 
 class DjangoTui(App):
     CSS_PATH = Path(__file__).parent / "trogon.scss"
-
-    # SCREENS = {
-    #     "home": HomeScreen,
-    # }
 
     def __init__(
         self,
