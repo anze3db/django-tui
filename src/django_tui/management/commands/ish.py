@@ -1,41 +1,20 @@
 from __future__ import annotations
 
 import os
-import shlex
 import sys
-from pathlib import Path
 from subprocess import run
 from typing import Any
-from webbrowser import open as open_url
 
-import click
-from django.core.management import BaseCommand, get_commands, load_command_class
-from rich.console import Console
-from rich.highlighter import ReprHighlighter
-from rich.text import Text
-from textual import events, on
-from textual.app import App, AutopilotCallbackType, ComposeResult
+from django.core.management import BaseCommand
+from textual import events
+from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal, Vertical, VerticalScroll, HorizontalScroll
-from textual.css.query import NoMatches
-from textual.screen import Screen
+from textual.containers import Vertical,HorizontalScroll
 from textual.widgets import (
-    Button,
     Footer,
     Label,
-    Static,
-    Tree,
-    Header,
 )
-from textual.widgets.tree import TreeNode
-from trogon.introspect import ArgumentSchema, CommandSchema, MultiValueParamData, OptionSchema
-from trogon.run_command import UserCommandData
-from trogon.widgets.about import TextDialog
-from trogon.widgets.command_info import CommandInfo
-from trogon.widgets.command_tree import CommandTree
-from trogon.widgets.form import CommandForm
-from trogon.widgets.multiple_choice import NonFocusableVerticalScroll
-from textual.widgets import TextArea,Static
+from textual.widgets import TextArea
 import django
 import traceback
 import importlib
@@ -45,10 +24,7 @@ from django.apps import apps
 
 from pprint import PrettyPrinter
 from textual.widgets.text_area import Selection
-from textual.widgets import Markdown
 from textual.screen import ModalScreen
-from textual.containers import Center
-from textual.widgets._button import ButtonVariant
 from textual.widgets import MarkdownViewer
 
 try:
@@ -57,7 +33,6 @@ try:
 except ImportError:
     # For python 3
     from io import StringIO
-
 
 
 def get_py_version():
@@ -225,7 +200,6 @@ class Runner(object):
         }
         return result
 
-
 class ExtendedTextArea(TextArea):
     """A subclass of TextArea with parenthesis-closing functionality."""
 
@@ -235,6 +209,10 @@ class ExtendedTextArea(TextArea):
             self.move_cursor_relative(columns=-1)
             event.prevent_default()
 
+        if event.character == '"':
+            self.insert('""')
+            self.move_cursor_relative(columns=-1)
+            event.prevent_default()
 
 class TextEditorBingingsInfo(ModalScreen[None]):
     BINDINGS = [
@@ -297,18 +275,6 @@ Text Editor Key Bindings List
         """Compose the content of the modal dialog."""
         with Vertical():
             yield MarkdownViewer(self.key_bindings,classes="spaced",show_table_of_contents=False)
-class AboutDialog(TextDialog):
-
-    DEFAULT_CSS = """
-    TextDialog > Vertical {
-        border: thick $primary 50%;
-    }
-    """
-
-    def __init__(self) -> None:
-        title = "About"
-        message = "Test"
-        super().__init__(title, message)
 
 class ShellApp(App):
     CSS_PATH = "ish.tcss"
