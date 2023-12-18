@@ -20,7 +20,6 @@ import warnings
 from django.apps import apps
 
 
-from pprint import PrettyPrinter
 from textual.widgets.text_area import Selection
 from textual.screen import ModalScreen,Screen
 from textual.widgets import MarkdownViewer
@@ -42,6 +41,10 @@ def get_dj_version():
 
 
 DEFAULT_IMPORT = {
+    'rich':[
+    'print_json',
+    'print'
+    ], 
     'django.db.models': [
         'Avg',
         'Case',
@@ -207,8 +210,23 @@ class ExtendedTextArea(TextArea):
             self.move_cursor_relative(columns=-1)
             event.prevent_default()
 
+        if event.character == "[":
+            self.insert("[]")
+            self.move_cursor_relative(columns=-1)
+            event.prevent_default()
+
+        if event.character == "{":
+            self.insert("{}")
+            self.move_cursor_relative(columns=-1)
+            event.prevent_default()
+
         if event.character == '"':
             self.insert('""')
+            self.move_cursor_relative(columns=-1)
+            event.prevent_default()
+
+        if event.character == "'":
+            self.insert("''")
             self.move_cursor_relative(columns=-1)
             event.prevent_default()
 
@@ -290,8 +308,8 @@ class InteractiveShellScreen(Screen):
     ):
         super().__init__(name, id, classes)
         self.runner = Runner()
-        self.input_tarea = ExtendedTextArea("", language="python", theme="dracula")
-        self.output_tarea =  TextArea("# Output", language="python", theme="dracula",classes="text-area")
+        self.input_tarea = ExtendedTextArea("",id="input", language="python", theme="dracula")
+        self.output_tarea =  TextArea("# Output", id="output",language="python", theme="dracula",classes="text-area")
     
 
     BINDINGS = [
@@ -304,6 +322,7 @@ class InteractiveShellScreen(Screen):
 
     def compose(self) -> ComposeResult:
         self.input_tarea.focus()
+        
         yield HorizontalScroll(
             self.input_tarea,
             self.output_tarea,
@@ -324,11 +343,7 @@ class InteractiveShellScreen(Screen):
             django.setup()
 
             result = self.runner.run_code(code)
-            
-            printer = PrettyPrinter()
-            formatted = printer.pformat(result["out"])
-
-            self.output_tarea.load_text(formatted)
+            self.output_tarea.load_text(result["out"])
             
     def action_copy_command(self) -> None:
         if sys.platform == "win32":
