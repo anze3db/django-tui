@@ -313,7 +313,9 @@ class DefaultImportsInfo(ModalScreen[None]):
                 theme="dracula",
             )
         with Vertical(id="dialog"):
-            yield Label(syntax)
+            yield HorizontalScroll(
+                Label(syntax,expand=True)
+            )
 
 class InteractiveShellScreen(Screen):
 
