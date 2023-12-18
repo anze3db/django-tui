@@ -20,9 +20,10 @@ import warnings
 from django.apps import apps
 
 
-from textual.widgets.text_area import Selection
+from textual.widgets.text_area import Selection,Location
 from textual.screen import ModalScreen,Screen
 from textual.widgets import MarkdownViewer
+from typing import List, Tuple
 
 try:
     # Only for python 2
@@ -315,6 +316,7 @@ class InteractiveShellScreen(Screen):
     BINDINGS = [
         Binding(key="ctrl+r", action="test", description="Run the query"),
         Binding(key="ctrl+z", action="copy_command", description="Copy to Clipboard"),
+        Binding(key="ctrl+underscore", action="toggle_comment", description="Toggle Comment",show=True),
         Binding(key="f1", action="editor_keys", description="Key Bindings"),
         ("escape", "app.back()", "Back")
     ]
@@ -369,6 +371,56 @@ class InteractiveShellScreen(Screen):
             self.notify("Selction copied to clipboard.")
         except FileNotFoundError:
             self.notify(f"Could not copy to clipboard. `{copy_command[0]}` not found.", severity="error")
+
+    def _get_selected_lines(self) -> Tuple[List[str], Location, Location]:
+        [first, last] = sorted([self.input_tarea.selection.start, self.input_tarea.selection.end])
+        lines = [self.input_tarea.document.get_line(i) for i in range(first[0], last[0] + 1)]
+        return lines, first, last
+    
+    def action_toggle_comment(self) -> None:
+        # Setup for multiple language support
+        # INLINE_MARKERS = {
+        #     "python": "#",
+        #     "py": "#",
+        # }
+        # inline_comment_marker = INLINE_MARKERS.get(self.input_tarea.language)
+        inline_comment_marker = "#"
+
+        if inline_comment_marker:
+            lines, first, last = self._get_selected_lines()
+            stripped_lines = [line.lstrip() for line in lines]
+            indents = [len(line) - len(line.lstrip()) for line in lines]
+            # if lines are already commented, remove them
+            if lines and all(
+                not line or line.startswith(inline_comment_marker)
+                    for line in stripped_lines
+            ):
+                offsets = [
+                    0
+                    if not line
+                    else (2 if line[len(inline_comment_marker)].isspace() else 1)
+                    for line in stripped_lines
+                ]
+                for lno, indent, offset in zip(
+                    range(first[0], last[0] + 1), indents, offsets
+                ):
+                    self.input_tarea.delete(
+                        start=(lno, indent),
+                        end=(lno, indent + offset),
+                        maintain_selection_offset=True,
+                    )
+            # add comment tokens to all lines
+            else:
+                indent = min(
+                    [indent for indent, line in zip(indents, stripped_lines) if line]
+                )
+                for lno, stripped_line in enumerate(stripped_lines, start=first[0]):
+                    if stripped_line:
+                        self.input_tarea.insert(
+                            f"{inline_comment_marker} ",
+                            location=(lno, indent),
+                            maintain_selection_offset=True,
+                        )
 
     def action_editor_keys(self) -> None:
         # self.notify(f"Selction:{self.input_tarea.BINDINGS}")
