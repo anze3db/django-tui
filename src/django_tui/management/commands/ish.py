@@ -24,6 +24,7 @@ from textual.widgets.text_area import Selection,Location
 from textual.screen import ModalScreen,Screen
 from textual.widgets import MarkdownViewer
 from typing import List, Tuple
+from rich.syntax import Syntax
 
 try:
     # Only for python 2
@@ -231,32 +232,15 @@ class ExtendedTextArea(TextArea):
             self.move_cursor_relative(columns=-1)
             event.prevent_default()
 
-class TextEditorBingingsInfo(ModalScreen[None]):
+class TextEditorBindingsInfo(ModalScreen[None]):
     BINDINGS = [
         Binding("escape", "dismiss(None)", "", show=False),
     ]
 
     DEFAULT_CSS = """
-
-    TextEditorBingingsInfo {
+    TextEditorBindingsInfo {
         align: center middle;
     }
-
-    #dialog {
-        grid-size: 2;
-        grid-gutter: 1 2;
-        grid-rows: 1fr 3;
-        padding: 0 1;
-        width: 90;
-        height: 20;
-        border: thick $background 80%;
-        background: $surface;
-    }
-
-    Button {
-        width: 100%;
-    }
-
 """
 
     key_bindings = """
@@ -299,6 +283,38 @@ Text Editor Key Bindings List
         with Vertical(id="dialog"):
             yield MarkdownViewer(self.key_bindings,classes="spaced",show_table_of_contents=False)
 
+class DefaultImportsInfo(ModalScreen[None]):
+    BINDINGS = [
+        Binding("escape", "dismiss(None)", "Close",),
+    ]
+
+    DEFAULT_CSS = """
+    DefaultImportsInfo {
+        align: center middle;
+    }
+"""
+
+    _title = "Default Imported Modules"
+
+    def __init__(self,imported_modules:str,name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,):
+        self.imported_modules = imported_modules
+        super().__init__(name, id, classes)
+
+    def compose(self) -> ComposeResult:
+        """Compose the content of the modal dialog."""
+        syntax = Syntax(
+                code=self.imported_modules,
+                lexer="python",
+                line_numbers=True,
+                word_wrap=False,
+                indent_guides=True,
+                theme="dracula",
+            )
+        with Vertical(id="dialog"):
+            yield Label(syntax)
+
 class InteractiveShellScreen(Screen):
 
     def __init__(
@@ -316,8 +332,9 @@ class InteractiveShellScreen(Screen):
     BINDINGS = [
         Binding(key="ctrl+r", action="test", description="Run the query"),
         Binding(key="ctrl+z", action="copy_command", description="Copy to Clipboard"),
-        Binding(key="ctrl+underscore", action="toggle_comment", description="Toggle Comment",show=True),
+        Binding(key="ctrl+underscore", action="toggle_comment", description="Toggle Comment",show=False),
         Binding(key="f1", action="editor_keys", description="Key Bindings"),
+        Binding(key="f2", action="default_imports", description="Default imports"),
         ("escape", "app.back()", "Back")
     ]
 
@@ -332,6 +349,9 @@ class InteractiveShellScreen(Screen):
         yield Label(f"Python: {get_py_version()}  Django: {get_dj_version()}")
         yield Footer()
     
+    def action_default_imports(self) ->None:
+        self.app.push_screen(DefaultImportsInfo(self.runner.importer.__str__()))
+
     def action_test(self) -> None:
         # get Code from start till the position of the cursor
         self.input_tarea.selection = Selection(start=(0, 0), end=self.input_tarea.cursor_location)
@@ -423,5 +443,4 @@ class InteractiveShellScreen(Screen):
                         )
 
     def action_editor_keys(self) -> None:
-        # self.notify(f"Selction:{self.input_tarea.BINDINGS}")
-        self.app.push_screen(TextEditorBingingsInfo())
+        self.app.push_screen(TextEditorBindingsInfo())

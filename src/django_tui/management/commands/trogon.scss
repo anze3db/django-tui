@@ -294,3 +294,14 @@ Select.command-form-select:focus SelectCurrent {
 .status_bar{
     background: $primary-darken-3;
 }
+
+#dialog {
+        grid-size: 2;
+        grid-gutter: 1 2;
+        grid-rows: 1fr 3;
+        padding: 0 1;
+        width: 90;
+        height: 20;
+        border: thick $background 80%;
+        background: $surface;
+    }
