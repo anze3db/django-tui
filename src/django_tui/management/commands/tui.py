@@ -5,7 +5,7 @@ import shlex
 import sys
 from pathlib import Path
 from subprocess import run
-from typing import Any
+from typing import Any, Literal
 from webbrowser import open as open_url
 
 import click
@@ -418,7 +418,7 @@ class DjangoTui(App):
         """
         open_url(url)
 
-    def action_select_mode(self, mode_id: str) -> None:
+    def action_select_mode(self, mode_id: Literal["commands", "shell"]) -> None:
         if mode_id == "commands":
             self.app.push_screen(DjangoCommandBuilder("pyhton manage.py", "Test command name"))
 
