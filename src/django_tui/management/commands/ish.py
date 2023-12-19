@@ -337,7 +337,7 @@ class InteractiveShellScreen(Screen):
         Binding(key="ctrl+underscore", action="toggle_comment", description="Toggle Comment",show=False),
         Binding(key="f1", action="editor_keys", description="Key Bindings"),
         Binding(key="f2", action="default_imports", description="Default imports"),
-        ("escape", "app.back()", "Back")
+        Binding(key="ctrl+j", action="select_mode('commands')", description="Commands"),
     ]
 
 
