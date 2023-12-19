@@ -6,7 +6,7 @@ import platform
 import sys
 import traceback
 import warnings
-from functools import cached_property
+from functools import lru_cache
 from io import StringIO
 from subprocess import run
 from typing import List, Tuple
@@ -57,94 +57,90 @@ DEFAULT_IMPORT = {
 }
 
 
-class Importer:
-    @cached_property
-    def modules(self):
-        """
-        Return list of modules and symbols to import
-        """
-        mods = {}
-        for module_name, symbols in DEFAULT_IMPORT.items():
-            try:
-                module = importlib.import_module(module_name)
-            except ImportError as e:
-                warnings.warn("django_admin_shell - autoimport warning :: {msg}".format(msg=str(e)), ImportWarning)
-                continue
-
-            mods[module_name] = []
-            for symbol_name in symbols:
-                if hasattr(module, symbol_name):
-                    mods[module_name].append(symbol_name)
-                else:
-                    warnings.warn(
-                        "django_admin_shell - autoimport warning :: "
-                        "AttributeError module '{mod}' has no attribute '{attr}'".format(
-                            mod=module_name, attr=symbol_name
-                        ),
-                        ImportWarning,
-                    )
-
-        for model_class in apps.get_models():
-            _mod = model_class.__module__
-            classes = mods.get(_mod, [])
-            classes.append(model_class.__name__)
-            mods[_mod] = classes
-
-        return mods
-
-    @cached_property
-    def scope(self):
-        """
-        Return map with symbols to module/object
-        Like:
-        "reverse" -> "django.urls.reverse"
-        """
-        scope = {}
-        for module_name, symbols in self.modules.items():
-            module = importlib.import_module(module_name)
-            for symbol_name in symbols:
-                scope[symbol_name] = getattr(module, symbol_name)
-        return scope
-
-    def __str__(self):
-        buf = []
-        for module, symbols in self.modules.items():
-            if symbols:
-                buf.append(f"from {module} import {', '.join(symbols)}")
-        return "\n".join(buf)
-
-
-class Runner:
-    def __init__(self):
-        self.importer = Importer()
-
-    def run_code(self, code):
-        """
-        Execute code and return result with status = success|error
-        Function manipulate stdout to grab output from exec
-        """
-        status = "success"
-        out = ""
-        tmp_stdout = sys.stdout
-        buf = StringIO()
-
+@lru_cache
+def get_modules():
+    """
+    Return list of modules and symbols to import
+    """
+    mods = {}
+    for module_name, symbols in DEFAULT_IMPORT.items():
         try:
-            sys.stdout = buf
-            exec(code, None, self.importer.scope)
-        except Exception:
-            out = traceback.format_exc()
-            status = "error"
-        else:
-            out = buf.getvalue()
-        finally:
-            sys.stdout = tmp_stdout
+            module = importlib.import_module(module_name)
+        except ImportError as e:
+            warnings.warn("django_admin_shell - autoimport warning :: {msg}".format(msg=str(e)), ImportWarning)
+            continue
 
-        result = {
-            "code": code,
-            "out": out,
-            "status": status,
-        }
-        return result
+        mods[module_name] = []
+        for symbol_name in symbols:
+            if hasattr(module, symbol_name):
+                mods[module_name].append(symbol_name)
+            else:
+                warnings.warn(
+                    "django_admin_shell - autoimport warning :: "
+                    "AttributeError module '{mod}' has no attribute '{attr}'".format(mod=module_name, attr=symbol_name),
+                    ImportWarning,
+                )
+
+    for model_class in apps.get_models():
+        _mod = model_class.__module__
+        classes = mods.get(_mod, [])
+        classes.append(model_class.__name__)
+        mods[_mod] = classes
+
+    return mods
+
+
+@lru_cache
+def get_scope():
+    """
+    Return map with symbols to module/object
+    Like:
+    "reverse" -> "django.urls.reverse"
+    """
+    scope = {}
+    for module_name, symbols in get_modules().items():
+        module = importlib.import_module(module_name)
+        for symbol_name in symbols:
+            scope[symbol_name] = getattr(module, symbol_name)
+    return scope
+
+
+@lru_cache
+def import_str():
+    buf = []
+    for module, symbols in get_modules().items():
+        if symbols:
+            buf.append(f"from {module} import {', '.join(symbols)}")
+    return "\n".join(buf)
+
+
+def run_code(code):
+    """
+    Execute code and return result with status = success|error
+    Function manipulate stdout to grab output from exec
+    """
+    status = "success"
+    out = ""
+    tmp_stdout = sys.stdout
+    buf = StringIO()
+
+    try:
+        sys.stdout = buf
+        exec(code, None, get_scope())
+    except Exception:
+        out = traceback.format_exc()
+        status = "error"
+    else:
+        out = buf.getvalue()
+    finally:
+        sys.stdout = tmp_stdout
+
+    result = {
+        "code": code,
+        "out": out,
+        "status": status,
+    }
+    return result
 
 
 class ExtendedTextArea(TextArea):
@@ -278,7 +274,6 @@ class InteractiveShellScreen(Screen):
         classes: str | None = None,
     ):
         super().__init__(name, id, classes)
-        self.runner = Runner()
         self.input_tarea = ExtendedTextArea("", id="input", language="python", theme="vscode_dark")
         self.output_tarea = TextArea(
             "# Output",
@@ -308,7 +303,7 @@ class InteractiveShellScreen(Screen):
         yield Footer()
 
     def action_default_imports(self) -> None:
-        self.app.push_screen(DefaultImportsInfo(self.runner.importer.__str__()))
+        self.app.push_screen(DefaultImportsInfo(import_str()))
 
     def action_run_code(self) -> None:
         # get Code from start till the position of the cursor
@@ -322,7 +317,7 @@ class InteractiveShellScreen(Screen):
             os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
             django.setup()
 
-            result = self.runner.run_code(code)
+            result = run_code(code)
             self.output_tarea.load_text(result["out"])
 
     def action_copy_command(self) -> None:
