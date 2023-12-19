@@ -35,7 +35,7 @@ from trogon.widgets.command_tree import CommandTree
 from trogon.widgets.form import CommandForm
 from trogon.widgets.multiple_choice import NonFocusableVerticalScroll
 
-from .ish import InteractiveShellScreen
+from django_tui.management.commands.ish import InteractiveShellScreen
 
 
 def introspect_django_commands() -> dict[str, CommandSchema]:
