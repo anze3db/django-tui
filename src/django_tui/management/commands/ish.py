@@ -6,6 +6,7 @@ import platform
 import sys
 import traceback
 import warnings
+from functools import cached_property
 from io import StringIO
 from subprocess import run
 from typing import List, Tuple
@@ -57,85 +58,60 @@ DEFAULT_IMPORT = {
 
 
 class Importer:
-    def __init__(self, import_django=None, import_models=None, extra_imports=None):
-        self.import_django = import_django or True
-        self.import_models = import_models or True
-        self.FROM_DJANGO = DEFAULT_IMPORT
-        if extra_imports is not None and isinstance(extra_imports, dict):
-            self.FROM_DJANGO.update(extra_imports)
-
-    _mods = None
-
-    def get_modules(self):
+    @cached_property
+    def modules(self):
         """
         Return list of modules and symbols to import
         """
-        if self._mods is None:
-            self._mods = {}
+        mods = {}
+        for module_name, symbols in DEFAULT_IMPORT.items():
+            try:
+                module = importlib.import_module(module_name)
+            except ImportError as e:
+                warnings.warn("django_admin_shell - autoimport warning :: {msg}".format(msg=str(e)), ImportWarning)
+                continue
 
-            if self.import_django and self.FROM_DJANGO:
-                for module_name, symbols in self.FROM_DJANGO.items():
-                    try:
-                        module = importlib.import_module(module_name)
-                    except ImportError as e:
-                        warnings.warn(
-                            "django_admin_shell - autoimport warning :: {msg}".format(msg=str(e)), ImportWarning
-                        )
-                        continue
+            mods[module_name] = []
+            for symbol_name in symbols:
+                if hasattr(module, symbol_name):
+                    mods[module_name].append(symbol_name)
+                else:
+                    warnings.warn(
+                        "django_admin_shell - autoimport warning :: "
+                        "AttributeError module '{mod}' has no attribute '{attr}'".format(
+                            mod=module_name, attr=symbol_name
+                        ),
+                        ImportWarning,
+                    )
 
-                    self._mods[module_name] = []
-                    for symbol_name in symbols:
-                        if hasattr(module, symbol_name):
-                            self._mods[module_name].append(symbol_name)
-                        else:
-                            warnings.warn(
-                                "django_admin_shell - autoimport warning :: "
-                                "AttributeError module '{mod}' has no attribute '{attr}'".format(
-                                    mod=module_name, attr=symbol_name
-                                ),
-                                ImportWarning,
-                            )
+        for model_class in apps.get_models():
+            _mod = model_class.__module__
+            classes = mods.get(_mod, [])
+            classes.append(model_class.__name__)
+            mods[_mod] = classes
 
-            if self.import_models:
-                for model_class in apps.get_models():
-                    _mod = model_class.__module__
-                    classes = self._mods.get(_mod, [])
-                    classes.append(model_class.__name__)
-                    self._mods[_mod] = classes
+        return mods
 
-        return self._mods
-
-    _scope = None
-
-    def get_scope(self):
+    @cached_property
+    def scope(self):
         """
         Return map with symbols to module/object
         Like:
         "reverse" -> "django.urls.reverse"
         """
-        if self._scope is None:
-            self._scope = {}
-            for module_name, symbols in self.get_modules().items():
-                module = importlib.import_module(module_name)
-                for symbol_name in symbols:
-                    self._scope[symbol_name] = getattr(module, symbol_name)
-
-        return self._scope
-
-    def clear_scope(self):
-        """
-        clear the scope.
-
-        Freeing declared variables to be garbage collected.
-        """
-        self._scope = None
+        scope = {}
+        for module_name, symbols in self.modules.items():
+            module = importlib.import_module(module_name)
+            for symbol_name in symbols:
+                scope[symbol_name] = getattr(module, symbol_name)
+        return scope
 
     def __str__(self):
-        buf = ""
-        for module, symbols in self.get_modules().items():
+        buf = []
+        for module, symbols in self.modules.items():
             if symbols:
-                buf += "from {mod} import {symbols}\n".format(mod=module, symbols=", ".join(symbols))
-        return buf
+                buf.append(f"from {module} import {', '.join(symbols)}")
+        return "\n".join(buf)
 
 
 class Runner:
@@ -154,8 +130,7 @@ class Runner:
 
         try:
             sys.stdout = buf
-            exec(code, None, self.importer.get_scope())
-            # exec(code, globals())
+            exec(code, None, self.importer.scope)
         except Exception:
             out = traceback.format_exc()
             status = "error"
@@ -215,36 +190,36 @@ class TextEditorBindingsInfo(ModalScreen[None]):
 
     key_bindings = """
 Text Editor Key Bindings List
-| Key(s)      | Description                                 |
-|-------------|---------------------------------------------|
-| escape      | Focus on the next item.                     |
-| up          | Move the cursor up.                         |
-| down        | Move the cursor down.                       |
-| left        | Move the cursor left.                       |
-| ctrl+left   | Move the cursor to the start of the word.   |
-| ctrl+shift+left | Move the cursor to the start of the word and select. |
-| right       | Move the cursor right.                      |
-| ctrl+right  | Move the cursor to the end of the word.      |
-| ctrl+shift+right | Move the cursor to the end of the word and select. |
-| home,ctrl+a | Move the cursor to the start of the line.    |
-| end,ctrl+e  | Move the cursor to the end of the line.      |
-| shift+home  | Move the cursor to the start of the line and select. |
-| shift+end   | Move the cursor to the end of the line and select. |
-| pageup      | Move the cursor one page up.                 |
-| pagedown    | Move the cursor one page down.               |
-| shift+up    | Select while moving the cursor up.           |
-| shift+down  | Select while moving the cursor down.         |
-| shift+left  | Select while moving the cursor left.         |
-| shift+right | Select while moving the cursor right.        |
-| backspace   | Delete character to the left of cursor.      |
-| ctrl+w      | Delete from cursor to start of the word.     |
-| delete,ctrl+d | Delete character to the right of cursor.    |
-| ctrl+f      | Delete from cursor to end of the word.       |
-| ctrl+x      | Delete the current line.                     |
-| ctrl+u      | Delete from cursor to the start of the line. |
-| ctrl+k      | Delete from cursor to the end of the line.   |
-| f6          | Select the current line.                     |
-| f7          | Select all text in the document.             |
+| Key(s)           | Description                                          |
+|------------------|------------------------------------------------------|
+| escape           | Focus on the next item.                              |
+| up               | Move the cursor up.                                  |
+| down             | Move the cursor down.                                |
+| left             | Move the cursor left.                                |
+| ctrl+left        | Move the cursor to the start of the word.            |
+| ctrl+shift+left  | Move the cursor to the start of the word and select. |
+| right            | Move the cursor right.                               |
+| ctrl+right       | Move the cursor to the end of the word.              |
+| ctrl+shift+right | Move the cursor to the end of the word and select.   |
+| home,ctrl+a      | Move the cursor to the start of the line.            |
+| end,ctrl+e       | Move the cursor to the end of the line.              |
+| shift+home       | Move the cursor to the start of the line and select. |
+| shift+end        | Move the cursor to the end of the line and select.   |
+| pageup           | Move the cursor one page up.                         |
+| pagedown         | Move the cursor one page down.                       |
+| shift+up         | Select while moving the cursor up.                   |
+| shift+down       | Select while moving the cursor down.                 |
+| shift+left       | Select while moving the cursor left.                 |
+| shift+right      | Select while moving the cursor right.                |
+| backspace        | Delete character to the left of cursor.              |
+| ctrl+w           | Delete from cursor to start of the word.             |
+| delete,ctrl+d    | Delete character to the right of cursor.             |
+| ctrl+f           | Delete from cursor to end of the word.               |
+| ctrl+x           | Delete the current line.                             |
+| ctrl+u           | Delete from cursor to the start of the line.         |
+| ctrl+k           | Delete from cursor to the end of the line.           |
+| f6               | Select the current line.                             |
+| f7               | Select all text in the document.                     |
 """
     _title = "Editor Keys Bindings"
 
@@ -314,12 +289,12 @@ class InteractiveShellScreen(Screen):
         )
 
     BINDINGS = [
-        Binding(key="ctrl+r", action="test", description="Run the query"),
+        Binding(key="ctrl+r", action="run_code", description="Run the query"),
         Binding(key="ctrl+z", action="copy_command", description="Copy to Clipboard"),
-        Binding(key="ctrl+underscore", action="toggle_comment", description="Toggle Comment", show=False),
         Binding(key="f1", action="editor_keys", description="Key Bindings"),
         Binding(key="f2", action="default_imports", description="Default imports"),
         Binding(key="ctrl+j", action="select_mode('commands')", description="Commands"),
+        Binding(key="ctrl+underscore", action="toggle_comment", description="Toggle Comment", show=False),
     ]
 
     def compose(self) -> ComposeResult:
@@ -335,7 +310,7 @@ class InteractiveShellScreen(Screen):
     def action_default_imports(self) -> None:
         self.app.push_screen(DefaultImportsInfo(self.runner.importer.__str__()))
 
-    def action_test(self) -> None:
+    def action_run_code(self) -> None:
         # get Code from start till the position of the cursor
         self.input_tarea.selection = Selection(start=(0, 0), end=self.input_tarea.cursor_location)
         self.input_tarea.action_cursor_line_end()
@@ -361,10 +336,6 @@ class InteractiveShellScreen(Screen):
         try:
             text_to_copy = self.input_tarea.selected_text
 
-            # self.notify(f"`{copy_command}`")
-            # command = 'echo ' + text.strip() + '| clip'
-            # os.system(command)
-
             run(
                 copy_command,
                 input=text_to_copy,
@@ -381,12 +352,6 @@ class InteractiveShellScreen(Screen):
         return lines, first, last
 
     def action_toggle_comment(self) -> None:
-        # Setup for multiple language support
-        # INLINE_MARKERS = {
-        #     "python": "#",
-        #     "py": "#",
-        # }
-        # inline_comment_marker = INLINE_MARKERS.get(self.input_tarea.language)
         inline_comment_marker = "#"
 
         if inline_comment_marker:
