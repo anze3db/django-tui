@@ -25,7 +25,6 @@ from textual.widgets import (
     Label,
     Static,
     Tree,
-    Header,
 )
 from textual.widgets.tree import TreeNode
 from trogon.introspect import ArgumentSchema, CommandSchema, MultiValueParamData, OptionSchema
@@ -35,7 +34,9 @@ from trogon.widgets.command_info import CommandInfo
 from trogon.widgets.command_tree import CommandTree
 from trogon.widgets.form import CommandForm
 from trogon.widgets.multiple_choice import NonFocusableVerticalScroll
+
 from .ish import InteractiveShellScreen
+
 
 def introspect_django_commands() -> dict[str, CommandSchema]:
     groups = {}
@@ -143,6 +144,7 @@ def introspect_django_commands() -> dict[str, CommandSchema]:
 
     return groups
 
+
 class AboutDialog(TextDialog):
     DEFAULT_CSS = """
     TextDialog > Vertical {
@@ -159,6 +161,7 @@ class AboutDialog(TextDialog):
             "https://github.com/anze3db/django-tui[/]",
         )
         super().__init__(title, message)
+
 
 # 2 For the command screen
 class DjangoCommandBuilder(Screen):
@@ -339,6 +342,7 @@ class DjangoCommandBuilder(Screen):
         if not self.is_grouped_cli:
             command_form.focus()
 
+
 class DjangoTui(App):
     CSS_PATH = Path(__file__).parent / "trogon.scss"
 
@@ -354,7 +358,6 @@ class DjangoTui(App):
         self.app_name = "python manage.py"
         self.command_name = "django-tui"
         self.open_shell = open_shell
-
 
     def on_mount(self):
         if self.open_shell:
@@ -415,17 +418,19 @@ class DjangoTui(App):
         """
         open_url(url)
 
-    def action_select_mode(self,mode_id:str) -> None:
+    def action_select_mode(self, mode_id: str) -> None:
         if mode_id == "commands":
             self.app.push_screen(DjangoCommandBuilder("pyhton manage.py", "Test command name"))
 
         elif mode_id == "shell":
             self.app.push_screen(InteractiveShellScreen("Interactive Shell"))
+
+
 class Command(BaseCommand):
     help = """Run and inspect Django commands in a text-based user interface (TUI)."""
 
     def add_arguments(self, parser):
-        parser.add_argument("--shell",action="store_true", help="Open django shell")
+        parser.add_argument("--shell", action="store_true", help="Open django shell")
 
     def handle(self, *args: Any, shell=False, **options: Any) -> None:
         app = DjangoTui(open_shell=shell)
