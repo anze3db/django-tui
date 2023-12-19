@@ -17,9 +17,15 @@ Inspect and run Django Commands in a text-based user interface (TUI), built with
 - [Running](#running)
 - [License](#license)
 
-## 🎬 Demo
+## 🎬 Demos
+
+### Running Django Commands
 
 https://github.com/anze3db/django-tui/assets/513444/fc84247a-9f4b-4017-9ae4-3f10fe9d9557
+
+### Running ORM Queries in Interactive Django Shell
+
+https://github.com/anze3db/django-tui/assets/513444/8a056da8-85a8-4086-9fa8-433b7346e787
 
 ## Installation
 
