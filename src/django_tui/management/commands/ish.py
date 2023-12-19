@@ -1,30 +1,28 @@
 from __future__ import annotations
 
+import importlib
 import os
 import sys
+import traceback
+import warnings
 from subprocess import run
+from typing import List, Tuple
 
+import django
+from django.apps import apps
+from rich.syntax import Syntax
 from textual import events
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Vertical,HorizontalScroll,VerticalScroll
+from textual.containers import HorizontalScroll, Vertical, VerticalScroll
+from textual.screen import ModalScreen, Screen
 from textual.widgets import (
     Footer,
     Label,
+    MarkdownViewer,
+    TextArea,
 )
-from textual.widgets import TextArea
-import django
-import traceback
-import importlib
-import warnings
-from django.apps import apps
-
-
-from textual.widgets.text_area import Selection,Location
-from textual.screen import ModalScreen,Screen
-from textual.widgets import MarkdownViewer
-from typing import List, Tuple
-from rich.syntax import Syntax
+from textual.widgets.text_area import Location, Selection
 
 try:
     # Only for python 2
@@ -38,46 +36,42 @@ def get_py_version():
     ver = sys.version_info
     return "{0}.{1}.{2}".format(ver.major, ver.minor, ver.micro)
 
+
 def get_dj_version():
     return django.__version__
 
 
 DEFAULT_IMPORT = {
-    'rich':[
-    'print_json',
-    'print'
-    ], 
-    'django.db.models': [
-        'Avg',
-        'Case',
-        'Count',
-        'F',
-        'Max',
-        'Min',
-        'Prefetch',
-        'Q',
-        'Sum',
-        'When',
+    "rich": ["print_json", "print"],
+    "django.db.models": [
+        "Avg",
+        "Case",
+        "Count",
+        "F",
+        "Max",
+        "Min",
+        "Prefetch",
+        "Q",
+        "Sum",
+        "When",
     ],
-    'django.conf': [
-        'settings',
+    "django.conf": [
+        "settings",
     ],
-    'django.core.cache': [
-        'cache',
+    "django.core.cache": [
+        "cache",
     ],
-    'django.contrib.auth': [
-        'get_user_model',
+    "django.contrib.auth": [
+        "get_user_model",
     ],
-    'django.utils': [
-        'timezone',
+    "django.utils": [
+        "timezone",
     ],
-    'django.urls': [
-        'reverse'
-    ],
+    "django.urls": ["reverse"],
 }
 
-class Importer(object):
 
+class Importer(object):
     def __init__(self, import_django=None, import_models=None, extra_imports=None):
         self.import_django = import_django or True
         self.import_models = import_models or True
@@ -95,16 +89,12 @@ class Importer(object):
             self._mods = {}
 
             if self.import_django and self.FROM_DJANGO:
-
                 for module_name, symbols in self.FROM_DJANGO.items():
                     try:
                         module = importlib.import_module(module_name)
                     except ImportError as e:
                         warnings.warn(
-                            "django_admin_shell - autoimport warning :: {msg}".format(
-                                msg=str(e)
-                            ),
-                            ImportWarning
+                            "django_admin_shell - autoimport warning :: {msg}".format(msg=str(e)), ImportWarning
                         )
                         continue
 
@@ -116,10 +106,9 @@ class Importer(object):
                             warnings.warn(
                                 "django_admin_shell - autoimport warning :: "
                                 "AttributeError module '{mod}' has no attribute '{attr}'".format(
-                                    mod=module_name,
-                                    attr=symbol_name
+                                    mod=module_name, attr=symbol_name
                                 ),
-                                ImportWarning
+                                ImportWarning,
                             )
 
             if self.import_models:
@@ -144,10 +133,7 @@ class Importer(object):
             for module_name, symbols in self.get_modules().items():
                 module = importlib.import_module(module_name)
                 for symbol_name in symbols:
-                    self._scope[symbol_name] = getattr(
-                        module,
-                        symbol_name
-                    )
+                    self._scope[symbol_name] = getattr(module, symbol_name)
 
         return self._scope
 
@@ -163,14 +149,11 @@ class Importer(object):
         buf = ""
         for module, symbols in self.get_modules().items():
             if symbols:
-                buf += "from {mod} import {symbols}\n".format(
-                    mod=module,
-                    symbols=", ".join(symbols)
-                )
+                buf += "from {mod} import {symbols}\n".format(mod=module, symbols=", ".join(symbols))
         return buf
 
-class Runner(object):
 
+class Runner(object):
     def __init__(self):
         self.importer = Importer()
 
@@ -190,18 +173,19 @@ class Runner(object):
             # exec(code, globals())
         except Exception:
             out = traceback.format_exc()
-            status = 'error'
+            status = "error"
         else:
             out = buf.getvalue()
         finally:
             sys.stdout = tmp_stdout
 
         result = {
-            'code': code,
-            'out':  out,
-            'status': status,
+            "code": code,
+            "out": out,
+            "status": status,
         }
         return result
+
 
 class ExtendedTextArea(TextArea):
     """A subclass of TextArea with parenthesis-closing functionality."""
@@ -231,6 +215,7 @@ class ExtendedTextArea(TextArea):
             self.insert("''")
             self.move_cursor_relative(columns=-1)
             event.prevent_default()
+
 
 class TextEditorBindingsInfo(ModalScreen[None]):
     BINDINGS = [
@@ -281,11 +266,16 @@ Text Editor Key Bindings List
     def compose(self) -> ComposeResult:
         """Compose the content of the modal dialog."""
         with Vertical(id="dialog"):
-            yield MarkdownViewer(self.key_bindings,classes="spaced",show_table_of_contents=False)
+            yield MarkdownViewer(self.key_bindings, classes="spaced", show_table_of_contents=False)
+
 
 class DefaultImportsInfo(ModalScreen[None]):
     BINDINGS = [
-        Binding("escape", "dismiss(None)", "Close",),
+        Binding(
+            "escape",
+            "dismiss(None)",
+            "Close",
+        ),
     ]
 
     DEFAULT_CSS = """
@@ -296,27 +286,31 @@ class DefaultImportsInfo(ModalScreen[None]):
 
     _title = "Default Imported Modules"
 
-    def __init__(self,imported_modules:str,name: str | None = None,
+    def __init__(
+        self,
+        imported_modules: str,
+        name: str | None = None,
         id: str | None = None,
-        classes: str | None = None,):
+        classes: str | None = None,
+    ):
         self.imported_modules = imported_modules
         super().__init__(name, id, classes)
 
     def compose(self) -> ComposeResult:
         """Compose the content of the modal dialog."""
         syntax = Syntax(
-                code=self.imported_modules,
-                lexer="python",
-                line_numbers=True,
-                word_wrap=False,
-                indent_guides=True,
-                theme="dracula",
-            )
+            code=self.imported_modules,
+            lexer="python",
+            line_numbers=True,
+            word_wrap=False,
+            indent_guides=True,
+            theme="dracula",
+        )
         with VerticalScroll(id="dialog"):
             yield Label(syntax)
 
-class InteractiveShellScreen(Screen):
 
+class InteractiveShellScreen(Screen):
     def __init__(
         self,
         name: str | None = None,
@@ -325,38 +319,36 @@ class InteractiveShellScreen(Screen):
     ):
         super().__init__(name, id, classes)
         self.runner = Runner()
-        self.input_tarea = ExtendedTextArea("",id="input", language="python", theme="dracula")
-        self.output_tarea =  TextArea("# Output", id="output",language="python", theme="dracula",classes="text-area")
-    
+        self.input_tarea = ExtendedTextArea("", id="input", language="python", theme="dracula")
+        self.output_tarea = TextArea("# Output", id="output", language="python", theme="dracula", classes="text-area")
 
     BINDINGS = [
         Binding(key="ctrl+r", action="test", description="Run the query"),
         Binding(key="ctrl+z", action="copy_command", description="Copy to Clipboard"),
-        Binding(key="ctrl+underscore", action="toggle_comment", description="Toggle Comment",show=False),
+        Binding(key="ctrl+underscore", action="toggle_comment", description="Toggle Comment", show=False),
         Binding(key="f1", action="editor_keys", description="Key Bindings"),
         Binding(key="f2", action="default_imports", description="Default imports"),
         Binding(key="ctrl+j", action="select_mode('commands')", description="Commands"),
     ]
 
-
     def compose(self) -> ComposeResult:
         self.input_tarea.focus()
-        
+
         yield HorizontalScroll(
             self.input_tarea,
             self.output_tarea,
         )
         yield Label(f"Python: {get_py_version()}  Django: {get_dj_version()}")
         yield Footer()
-    
-    def action_default_imports(self) ->None:
+
+    def action_default_imports(self) -> None:
         self.app.push_screen(DefaultImportsInfo(self.runner.importer.__str__()))
 
     def action_test(self) -> None:
         # get Code from start till the position of the cursor
         self.input_tarea.selection = Selection(start=(0, 0), end=self.input_tarea.cursor_location)
         self.input_tarea.action_cursor_line_end()
-        code = self.input_tarea.get_text_range(start=(0,0),end=self.input_tarea.cursor_location)
+        code = self.input_tarea.get_text_range(start=(0, 0), end=self.input_tarea.cursor_location)
 
         if len(code) > 0:
             # Because the cli - texualize is running on a loop - has an event loop
@@ -366,7 +358,7 @@ class InteractiveShellScreen(Screen):
 
             result = self.runner.run_code(code)
             self.output_tarea.load_text(result["out"])
-            
+
     def action_copy_command(self) -> None:
         if sys.platform == "win32":
             copy_command = ["clip"]
@@ -376,7 +368,7 @@ class InteractiveShellScreen(Screen):
             copy_command = ["xclip", "-selection", "clipboard"]
 
         try:
-            text_to_copy = self.input_tarea.selected_text 
+            text_to_copy = self.input_tarea.selected_text
 
             # self.notify(f"`{copy_command}`")
             # command = 'echo ' + text.strip() + '| clip'
@@ -396,7 +388,7 @@ class InteractiveShellScreen(Screen):
         [first, last] = sorted([self.input_tarea.selection.start, self.input_tarea.selection.end])
         lines = [self.input_tarea.document.get_line(i) for i in range(first[0], last[0] + 1)]
         return lines, first, last
-    
+
     def action_toggle_comment(self) -> None:
         # Setup for multiple language support
         # INLINE_MARKERS = {
@@ -411,19 +403,12 @@ class InteractiveShellScreen(Screen):
             stripped_lines = [line.lstrip() for line in lines]
             indents = [len(line) - len(line.lstrip()) for line in lines]
             # if lines are already commented, remove them
-            if lines and all(
-                not line or line.startswith(inline_comment_marker)
-                    for line in stripped_lines
-            ):
+            if lines and all(not line or line.startswith(inline_comment_marker) for line in stripped_lines):
                 offsets = [
-                    0
-                    if not line
-                    else (2 if line[len(inline_comment_marker)].isspace() else 1)
+                    0 if not line else (2 if line[len(inline_comment_marker)].isspace() else 1)
                     for line in stripped_lines
                 ]
-                for lno, indent, offset in zip(
-                    range(first[0], last[0] + 1), indents, offsets
-                ):
+                for lno, indent, offset in zip(range(first[0], last[0] + 1), indents, offsets):
                     self.input_tarea.delete(
                         start=(lno, indent),
                         end=(lno, indent + offset),
@@ -431,9 +416,7 @@ class InteractiveShellScreen(Screen):
                     )
             # add comment tokens to all lines
             else:
-                indent = min(
-                    [indent for indent, line in zip(indents, stripped_lines) if line]
-                )
+                indent = min([indent for indent, line in zip(indents, stripped_lines) if line])
                 for lno, stripped_line in enumerate(stripped_lines, start=first[0]):
                     if stripped_line:
                         self.input_tarea.insert(
