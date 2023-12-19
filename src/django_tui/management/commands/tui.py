@@ -344,6 +344,7 @@ class DjangoTui(App):
 
     def __init__(
         self,
+        *,
         open_shell: bool = False,
     ) -> None:
         super().__init__()
@@ -426,8 +427,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--shell",action="store_true", help="Open django shell")
 
-    def handle(self, *args: Any, **options: Any) -> None:
-        open_shell = options.get("shell")
-
-        app = DjangoTui(open_shell=open_shell)
+    def handle(self, *args: Any, shell=False, **options: Any) -> None:
+        app = DjangoTui(open_shell=shell)
         app.run()
