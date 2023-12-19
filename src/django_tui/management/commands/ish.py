@@ -5,6 +5,7 @@ import os
 import sys
 import traceback
 import warnings
+from io import StringIO
 from subprocess import run
 from typing import List, Tuple
 
@@ -23,13 +24,6 @@ from textual.widgets import (
     TextArea,
 )
 from textual.widgets.text_area import Location, Selection
-
-try:
-    # Only for python 2
-    from StringIO import StringIO
-except ImportError:
-    # For python 3
-    from io import StringIO
 
 
 def get_py_version():
