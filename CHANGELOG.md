@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
+## [23.9] - 2023-12-19
+
+### Added
+
+Interactive Shell screen for running ORM queries.
+
 ## [23.8] - 2023-12-15
 
 ### Fixed
