@@ -56,7 +56,7 @@ DEFAULT_IMPORT = {
 }
 
 
-class Importer(object):
+class Importer:
     def __init__(self, import_django=None, import_models=None, extra_imports=None):
         self.import_django = import_django or True
         self.import_models = import_models or True
@@ -138,7 +138,7 @@ class Importer(object):
         return buf
 
 
-class Runner(object):
+class Runner:
     def __init__(self):
         self.importer = Importer()
 
