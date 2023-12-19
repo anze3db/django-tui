@@ -339,49 +339,6 @@ class DjangoCommandBuilder(Screen):
         if not self.is_grouped_cli:
             command_form.focus()
 
-# 1 The main screen
-class HomeScreen(Screen):
-
-    CSS = """
-    Screen {
-        layout: grid;
-        grid-size: 2;
-        grid-gutter: 2;
-        padding: 2;
-    }
-    """
-     
-    BINDINGS = [
-        Binding(key="s", action="select_mode('shell')", description="Shell"),
-        Binding(key="c", action="select_mode('commands')", description="Commands"),
-        Binding(key="t", action="hello", description="Hello"),
-    ]
-    
-
-    def compose(self) -> ComposeResult:
-        yield Header()
-        yield Button("C - Django Commands", id="commands", variant="success")
-        yield Button("S - Django Shell", id="shell", variant="error")
-        yield Footer()
-    
-    def action_hello(self) -> None:
-        self.notify("hello")
-
-    def action_select_mode(self,mode_id:str) -> None:
-        if mode_id == "commands":
-            self.app.push_screen(DjangoCommandBuilder("pyhton manage.py", "Test command name"))
-
-        elif mode_id == "shell":
-            self.app.push_screen(InteractiveShellScreen("Interactive Shell"))
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Event handler called when a button is pressed."""
-        if event.button.id == "commands":
-            self.app.push_screen(DjangoCommandBuilder("pyhton manage.py", "Test command name"))
-
-        elif event.button.id == "shell":
-            self.app.push_screen(InteractiveShellScreen("Interactive Shell"))
-
 class DjangoTui(App):
     CSS_PATH = Path(__file__).parent / "trogon.scss"
 
