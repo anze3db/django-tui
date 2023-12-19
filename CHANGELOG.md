@@ -11,7 +11,7 @@ and this project adheres to [Calendar Versioning](https://calver.org).
 
 Interactive Shell screen for running ORM queries.
 
-https://github.com/anze3db/django-tui/assets/513444/709d5e25-c864-483d-8869-516dec234404
+https://github.com/anze3db/django-tui/assets/513444/8a056da8-85a8-4086-9fa8-433b7346e787
 
 ## [23.8] - 2023-12-15
 
