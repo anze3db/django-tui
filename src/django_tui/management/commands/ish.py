@@ -7,7 +7,7 @@ from subprocess import run
 from textual import events
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Vertical,HorizontalScroll
+from textual.containers import Vertical,HorizontalScroll,VerticalScroll
 from textual.widgets import (
     Footer,
     Label,
@@ -312,10 +312,8 @@ class DefaultImportsInfo(ModalScreen[None]):
                 indent_guides=True,
                 theme="dracula",
             )
-        with Vertical(id="dialog"):
-            yield HorizontalScroll(
-                Label(syntax,expand=True)
-            )
+        with VerticalScroll(id="dialog"):
+            yield Label(syntax)
 
 class InteractiveShellScreen(Screen):
 
