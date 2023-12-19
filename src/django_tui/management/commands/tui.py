@@ -25,6 +25,7 @@ from textual.widgets import (
     Label,
     Static,
     Tree,
+    Header,
 )
 from textual.widgets.tree import TreeNode
 from trogon.introspect import ArgumentSchema, CommandSchema, MultiValueParamData, OptionSchema
@@ -34,7 +35,7 @@ from trogon.widgets.command_info import CommandInfo
 from trogon.widgets.command_tree import CommandTree
 from trogon.widgets.form import CommandForm
 from trogon.widgets.multiple_choice import NonFocusableVerticalScroll
-
+from .ish import InteractiveShellScreen
 
 def introspect_django_commands() -> dict[str, CommandSchema]:
     groups = {}
@@ -142,7 +143,6 @@ def introspect_django_commands() -> dict[str, CommandSchema]:
 
     return groups
 
-
 class AboutDialog(TextDialog):
     DEFAULT_CSS = """
     TextDialog > Vertical {
@@ -160,7 +160,7 @@ class AboutDialog(TextDialog):
         )
         super().__init__(title, message)
 
-
+# 2 For the command screen
 class DjangoCommandBuilder(Screen):
     COMPONENT_CLASSES = {"version-string", "prompt", "command-name-syntax"}
 
@@ -170,6 +170,8 @@ class DjangoCommandBuilder(Screen):
         Binding(key="ctrl+t", action="focus_command_tree", description="Focus Command Tree"),
         # Binding(key="ctrl+o", action="show_command_info", description="Command Info"),
         Binding(key="ctrl+s", action="focus('search')", description="Search"),
+        Binding(key="ctrl+j", action="select_mode('shell')", description="Shell"),
+        ("escape", "app.back", "Back"),
         Binding(key="f1", action="about", description="About"),
     ]
 
@@ -337,12 +339,12 @@ class DjangoCommandBuilder(Screen):
         if not self.is_grouped_cli:
             command_form.focus()
 
-
 class DjangoTui(App):
     CSS_PATH = Path(__file__).parent / "trogon.scss"
 
     def __init__(
         self,
+        open_shell: bool = False,
     ) -> None:
         super().__init__()
         self.post_run_command: list[str] = []
@@ -350,9 +352,15 @@ class DjangoTui(App):
         self.execute_on_exit = False
         self.app_name = "python manage.py"
         self.command_name = "django-tui"
+        self.open_shell = open_shell
+
 
     def on_mount(self):
-        self.push_screen(DjangoCommandBuilder(self.app_name, self.command_name))
+        if self.open_shell:
+            self.push_screen(InteractiveShellScreen("Interactive Shell"))
+        else:
+            self.push_screen(DjangoCommandBuilder(self.app_name, self.command_name))
+            # self.push_screen(HomeScreen(self.app_name))
 
     @on(Button.Pressed, "#home-exec-button")
     def on_button_pressed(self):
@@ -406,10 +414,20 @@ class DjangoTui(App):
         """
         open_url(url)
 
+    def action_select_mode(self,mode_id:str) -> None:
+        if mode_id == "commands":
+            self.app.push_screen(DjangoCommandBuilder("pyhton manage.py", "Test command name"))
 
+        elif mode_id == "shell":
+            self.app.push_screen(InteractiveShellScreen("Interactive Shell"))
 class Command(BaseCommand):
     help = """Run and inspect Django commands in a text-based user interface (TUI)."""
 
+    def add_arguments(self, parser):
+        parser.add_argument("--shell",action="store_true", help="Open django shell")
+
     def handle(self, *args: Any, **options: Any) -> None:
-        app = DjangoTui()
+        open_shell = options.get("shell")
+
+        app = DjangoTui(open_shell=open_shell)
         app.run()
