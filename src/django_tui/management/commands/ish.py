@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import os
+import platform
 import sys
 import traceback
 import warnings
@@ -24,16 +25,6 @@ from textual.widgets import (
     TextArea,
 )
 from textual.widgets.text_area import Location, Selection
-
-
-def get_py_version():
-    ver = sys.version_info
-    return "{0}.{1}.{2}".format(ver.major, ver.minor, ver.micro)
-
-
-def get_dj_version():
-    return django.__version__
-
 
 DEFAULT_IMPORT = {
     "rich": ["print_json", "print"],
@@ -332,7 +323,7 @@ class InteractiveShellScreen(Screen):
             self.input_tarea,
             self.output_tarea,
         )
-        yield Label(f"Python: {get_py_version()}  Django: {get_dj_version()}")
+        yield Label(f"Python: {platform.python_version()}  Django: {django.__version__}")
         yield Footer()
 
     def action_default_imports(self) -> None:
