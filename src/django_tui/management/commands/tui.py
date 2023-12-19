@@ -157,6 +157,7 @@ class AboutDialog(TextDialog):
         message = Text.from_markup(
             "Built with [@click=app.visit('https://github.com/textualize/textual')]Textual[/] & [@click=app.visit('https://github.com/textualize/trogon')]Trogon[/] "
             "by [@click=app.visit('https://pecar.me')]Anže Pečar[/].\n\n"
+            "Interactive Shell contributed by [@click=app.visit('https://github.com/shtayeb')]Shahryar Tayeb[/].\n\n"
             "[@click=app.visit('https://github.com/anze3db/django-tui')]"
             "https://github.com/anze3db/django-tui[/]",
         )
