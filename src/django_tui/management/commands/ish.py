@@ -304,8 +304,14 @@ class InteractiveShellScreen(Screen):
     ):
         super().__init__(name, id, classes)
         self.runner = Runner()
-        self.input_tarea = ExtendedTextArea("", id="input", language="python", theme="dracula")
-        self.output_tarea = TextArea("# Output", id="output", language="python", theme="dracula", classes="text-area")
+        self.input_tarea = ExtendedTextArea("", id="input", language="python", theme="vscode_dark")
+        self.output_tarea = TextArea(
+            "# Output",
+            id="output",
+            language="python",
+            theme="vscode_dark",
+            classes="text-area",
+        )
 
     BINDINGS = [
         Binding(key="ctrl+r", action="test", description="Run the query"),
