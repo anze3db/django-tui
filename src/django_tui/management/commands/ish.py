@@ -147,28 +147,31 @@ class ExtendedTextArea(TextArea):
     """A subclass of TextArea with parenthesis-closing functionality."""
 
     def _on_key(self, event: events.Key) -> None:
-        if event.character == "(":
-            self.insert("()")
-            self.move_cursor_relative(columns=-1)
-            event.prevent_default()
-
-        if event.character == "[":
-            self.insert("[]")
-            self.move_cursor_relative(columns=-1)
-            event.prevent_default()
-
-        if event.character == "{":
-            self.insert("{}")
-            self.move_cursor_relative(columns=-1)
-            event.prevent_default()
-
-        if event.character == '"':
-            self.insert('""')
-            self.move_cursor_relative(columns=-1)
-            event.prevent_default()
-
-        if event.character == "'":
-            self.insert("''")
+        chars = [
+            {
+                "char":"(",
+                "closing":")"
+            },
+            {
+                "char":"{",
+                "closing":"}"
+            },
+            {
+                "char":"[",
+                "closing":"]"
+            },
+            {
+                "char":"'",
+                "closing":"'"
+            },
+            {
+                "char":'"',
+                "closing":'"'
+            },
+        ]
+        event_char_list = list(filter(lambda item: item["char"] == event.character, chars))
+        if len(event_char_list) > 0:
+            self.insert(f"{event_char_list[0]['char']}{event_char_list[0]['closing']}")
             self.move_cursor_relative(columns=-1)
             event.prevent_default()
 
@@ -329,7 +332,7 @@ class InteractiveShellScreen(Screen):
             copy_command = ["xclip", "-selection", "clipboard"]
 
         try:
-            text_to_copy = self.input_tarea.selected_text
+            text_to_copy = self.input_tarea.selected_text or self.output_tarea.selected_text
 
             run(
                 copy_command,
