@@ -9,7 +9,8 @@ and this project adheres to [Calendar Versioning](https://calver.org).
 
 ### Added
 
-Ability to copy from the output shell area. Thanks @shtayeb!
+Improvements to copying shell input and output. Thanks @shtayeb!
+
 
 ## [23.9] - 2023-12-19
 
