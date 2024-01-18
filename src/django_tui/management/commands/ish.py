@@ -147,31 +147,16 @@ class ExtendedTextArea(TextArea):
     """A subclass of TextArea with parenthesis-closing functionality."""
 
     def _on_key(self, event: events.Key) -> None:
-        chars = [
-            {
-                "char":"(",
-                "closing":")"
-            },
-            {
-                "char":"{",
-                "closing":"}"
-            },
-            {
-                "char":"[",
-                "closing":"]"
-            },
-            {
-                "char":"'",
-                "closing":"'"
-            },
-            {
-                "char":'"',
-                "closing":'"'
-            },
-        ]
-        event_char_list = list(filter(lambda item: item["char"] == event.character, chars))
-        if len(event_char_list) > 0:
-            self.insert(f"{event_char_list[0]['char']}{event_char_list[0]['closing']}")
+        auto_close_chars = {
+            "(": ")",
+            "{": "}",
+            "[": "]",
+            "'": "'",
+            '"': '"',
+        }
+        closing_char = auto_close_chars.get(event.character)
+        if closing_char:
+            self.insert(f"{event.character}{closing_char}")
             self.move_cursor_relative(columns=-1)
             event.prevent_default()
 
