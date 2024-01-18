@@ -317,7 +317,35 @@ class InteractiveShellScreen(Screen):
             copy_command = ["xclip", "-selection", "clipboard"]
 
         try:
-            text_to_copy = self.input_tarea.selected_text or self.output_tarea.selected_text
+            # If nothing is selected copy all text in focused area
+            if not self.input_tarea.selected_text and not self.output_tarea.selected_text:
+                if self.input_tarea.text and self.input_tarea.has_focus:
+                    text_to_copy = self.input_tarea.text
+                    msg = "Input copied to clipboard."
+                elif self.output_tarea.text and self.output_tarea.has_focus:
+                    text_to_copy = self.output_tarea.text
+                    msg = "Output copied to clipboard."
+                else:
+                    self.notify("Nothing to copy to clipboard.", severity="warning")
+                    return
+
+            # If both areas have selected text copy the selected text in focused area
+            elif self.input_tarea.selected_text and self.output_tarea.selected_text:
+                if self.input_tarea.has_focus:
+                    text_to_copy = self.input_tarea.selected_text
+                    msg = "Input selection copied to clipboard."
+                else:
+                    text_to_copy = self.output_tarea.selected_text
+                    msg = "Output selection copied to clipboard."
+            elif self.input_tarea.selected_text:
+                text_to_copy = self.input_tarea.selected_text
+                msg = "Input selection copied to clipboard."
+            elif self.output_tarea.selected_text:
+                text_to_copy = self.output_tarea.selected_text
+                msg = "Output selection copied to clipboard."
+            else:
+                self.notify("Nothing to copy to clipboard.", severity="warning")
+                return
 
             run(
                 copy_command,
@@ -325,7 +353,7 @@ class InteractiveShellScreen(Screen):
                 text=True,
                 check=False,
             )
-            self.notify("Selction copied to clipboard.")
+            self.notify(msg)
         except FileNotFoundError:
             self.notify(f"Could not copy to clipboard. `{copy_command[0]}` not found.", severity="error")
 
