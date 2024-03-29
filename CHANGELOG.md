@@ -11,7 +11,7 @@ and this project adheres to [Calendar Versioning](https://calver.org).
 
 Regression caused by Textual 0.54.0 release.
 
-## [24.1] - 2023-01-18
+## [24.1] - 2024-01-18
 
 ### Added
 
