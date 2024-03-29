@@ -36,8 +36,8 @@ classifiers = [
 ]
 dependencies = [
   "django>=3.2",
-  "textual[syntax]>0.39.0 ; python_version < '3.12'",
-  "textual>0.39.0 ; python_version >= '3.12'", # tree-sitter-languages doesn't support 3.12 yet (https://github.com/grantjenks/py-tree-sitter-languages/issues/30)
+  "textual[syntax]>=0.54.0 ; python_version < '3.12'",
+  "textual>=0.54.0 ; python_version >= '3.12'", # tree-sitter-languages doesn't support 3.12 yet (https://github.com/grantjenks/py-tree-sitter-languages/issues/30)
   "trogon",
 ]
 
