@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
+## [24.2] - 2024-03-29
+
+### Fixed
+
+Regression caused by Textual 0.54.0 release.
+
 ## [24.1] - 2023-01-18
 
 ### Added
