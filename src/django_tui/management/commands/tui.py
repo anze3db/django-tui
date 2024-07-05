@@ -153,7 +153,7 @@ class AboutDialog(TextDialog):
     """
 
     def __init__(self) -> None:
-        title = f"About django-tui"
+        title = "About django-tui"
         message = Text.from_markup(
             "Built with [@click=app.visit('https://github.com/textualize/textual')]Textual[/] & [@click=app.visit('https://github.com/textualize/trogon')]Trogon[/] "
             "by [@click=app.visit('https://pecar.me')]Anže Pečar[/].\n\n"
@@ -167,17 +167,6 @@ class AboutDialog(TextDialog):
 # 2 For the command screen
 class DjangoCommandBuilder(Screen):
     COMPONENT_CLASSES = {"version-string", "prompt", "command-name-syntax"}
-
-    BINDINGS = [
-        Binding(key="ctrl+r", action="close_and_run", description="Close & Run"),
-        Binding(key="ctrl+z", action="copy_command", description="Copy Command to Clipboard"),
-        Binding(key="ctrl+t", action="focus_command_tree", description="Focus Command Tree"),
-        # Binding(key="ctrl+o", action="show_command_info", description="Command Info"),
-        Binding(key="ctrl+s", action="focus('search')", description="Search"),
-        Binding(key="ctrl+j", action="select_mode('shell')", description="Shell"),
-        ("escape", "app.back", "Back"),
-        Binding(key="f1", action="about", description="About"),
-    ]
 
     def __init__(
         self,
@@ -257,32 +246,6 @@ class DjangoCommandBuilder(Screen):
         self.app.execute_on_exit = True
         self.app.exit()
 
-    def action_copy_command(self) -> None:
-        if self.command_data is None:
-            return
-
-        if sys.platform == "win32":
-            copy_command = ["clip"]
-        elif sys.platform == "darwin":
-            copy_command = ["pbcopy"]
-        else:
-            copy_command = ["xclip", "-selection", "clipboard"]
-
-        try:
-            command = self.click_app_name + " " + " ".join(shlex.quote(str(x)) for x in self.command_data.to_cli_args())
-            run(
-                copy_command,
-                input=command,
-                text=True,
-                check=False,
-            )
-            self.notify(f"`{command}` copied to clipboard.")
-        except FileNotFoundError:
-            self.notify(f"Could not copy to clipboard. `{copy_command[0]}` not found.", severity="error")
-
-    def action_about(self) -> None:
-        self.app.push_screen(AboutDialog())
-
     async def on_mount(self, event: events.Mount) -> None:
         await self._refresh_command_form()
 
@@ -346,6 +309,16 @@ class DjangoCommandBuilder(Screen):
 
 class DjangoTui(App):
     CSS_PATH = Path(__file__).parent / "trogon.scss"
+
+    BINDINGS = [
+        Binding(key="ctrl+r", action="close_and_run", description="Close & Run"),
+        Binding(key="ctrl+z", action="copy_command", description="Copy Command to Clipboard"),
+        Binding(key="ctrl+t", action="focus_command_tree", description="Focus Command Tree"),
+        # Binding(key="ctrl+o", action="show_command_info", description="Command Info"),
+        Binding(key="ctrl+s", action="focus('search')", description="Search"),
+        Binding(key="ctrl+j", action="select_mode('shell')", description="Shell"),
+        Binding(key="f1", action="about", description="About"),
+    ]
 
     def __init__(
         self,
@@ -425,6 +398,14 @@ class DjangoTui(App):
 
         elif mode_id == "shell":
             self.app.push_screen(InteractiveShellScreen("Interactive Shell"))
+
+    def action_copy_command(self) -> None:
+        command = self.app_name + " " + " ".join(shlex.quote(str(x)) for x in self.post_run_command)
+        self.copy_to_clipboard(command)
+        self.notify(f"`{command}` copied to clipboard.")
+
+    def action_about(self) -> None:
+        self.app.push_screen(AboutDialog())
 
 
 class Command(BaseCommand):

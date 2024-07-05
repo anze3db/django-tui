@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
+## [24.3] - 2024-07-05
+
+### Added
+
+Command highlighting on Python 3.12
+Django 5.1 support
+
+### Fixed
+
+Crash on startup when used with older Textual versions
+Bug that prevented commands from working
+
+
 ## [24.2] - 2024-03-29
 
 ### Fixed

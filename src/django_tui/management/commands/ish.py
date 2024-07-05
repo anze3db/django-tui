@@ -215,11 +215,7 @@ Text Editor Key Bindings List
 
 class DefaultImportsInfo(ModalScreen[None]):
     BINDINGS = [
-        Binding(
-            "escape",
-            "dismiss(None)",
-            "Close",
-        ),
+        Binding("escape", "dismiss(None)", "Close"),
     ]
 
     DEFAULT_CSS = """
@@ -394,3 +390,12 @@ class InteractiveShellScreen(Screen):
 
     def action_editor_keys(self) -> None:
         self.app.push_screen(TextEditorBindingsInfo())
+
+    def action_select_mode(self, mode_id: Literal["commands", "shell"]) -> None:
+        if mode_id == "commands":
+            from django_tui.management.commands.tui import DjangoCommandBuilder
+
+            self.app.push_screen(DjangoCommandBuilder("pyhton manage.py", "Test command name"))
+
+        elif mode_id == "shell":
+            self.app.push_screen(InteractiveShellScreen("Interactive Shell"))
