@@ -277,7 +277,7 @@ class DjangoCommandBuilder(Screen):
         """Update the description of the command at the bottom of the sidebar
         based on the currently selected node in the command tree."""
         description_box = self.query_one("#home-command-description", Static)
-        description_text = node.data.docstring or ""
+        description_text = getattr(node.data, "docstring", "") or ""
         description_text = description_text.lstrip()
         description_text = f"[b]{node.label if self.is_grouped_cli else self.click_app_name}[/]\n{description_text}"
         description_box.update(description_text)
