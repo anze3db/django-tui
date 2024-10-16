@@ -9,14 +9,8 @@ description = 'Inspect and run Django Commands in a text-based user interface (T
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
-keywords = [
-  "django",
-  "tui",
-  "textual"
-]
-authors = [
-  { name = "Anže Pečar", email = "anze@pecar.me" },
-]
+keywords = ["django", "tui", "textual"]
+authors = [{ name = "Anže Pečar", email = "anze@pecar.me" }]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Framework :: Django",
@@ -35,11 +29,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = [
-  "django>=3.2",
-  "textual[syntax]>=0.64.0",
-  "trogon",
-]
+dependencies = ["django>=3.2", "textual>=0.64.0", "trogon"]
 
 [project.urls]
 Documentation = "https://github.com/anze3db/django-tui#readme"
@@ -53,46 +43,24 @@ Twitter = "https://twitter.com/anze3db"
 path = "src/django_tui/__about__.py"
 
 [tool.hatch.envs.default]
-dependencies = [
-  "coverage[toml]>=6.5",
-  "pytest",
-]
+dependencies = ["coverage[toml]>=6.5", "pytest"]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
-cov-report = [
-  "- coverage combine",
-  "coverage report",
-]
-cov = [
-  "test-cov",
-  "cov-report",
-]
+cov-report = ["- coverage combine", "coverage report"]
+cov = ["test-cov", "cov-report"]
 
 [[tool.hatch.envs.all.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.lint]
 detached = true
-dependencies = [
-  "mypy>=1.0.0",
-  "ruff>=0.1.6",
-]
+dependencies = ["mypy>=1.0.0", "ruff>=0.1.6"]
 [tool.hatch.envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:src/django_tui tests}"
-style = [
-  "ruff {args:.}",
-  "ruff format --check {args:.}",
-]
-fmt = [
-  "ruff format {args:.}",
-  "ruff --fix {args:.}",
-  "style",
-]
-all = [
-  "style",
-  "typing",
-]
+style = ["ruff {args:.}", "ruff format --check {args:.}"]
+fmt = ["ruff format {args:.}", "ruff --fix {args:.}", "style"]
+all = ["style", "typing"]
 
 [tool.ruff]
 target-version = "py38"
@@ -130,9 +98,15 @@ ignore = [
   # Allow boolean positional values in function calls, like `dict.get(... True)`
   "FBT003",
   # Ignore checks for possible passwords
-  "S105", "S106", "S107",
+  "S105",
+  "S106",
+  "S107",
   # Ignore complexity
-  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+  "C901",
+  "PLR0911",
+  "PLR0912",
+  "PLR0913",
+  "PLR0915",
 ]
 unfixable = [
   # Don't touch unused imports
@@ -153,17 +127,11 @@ ban-relative-imports = "all"
 source_pkgs = ["django_tui", "tests"]
 branch = true
 parallel = true
-omit = [
-  "src/django_tui/__about__.py",
-]
+omit = ["src/django_tui/__about__.py"]
 
 [tool.coverage.paths]
 django_tui = ["src/django_tui", "*/django-tui/src/django_tui"]
 tests = ["tests", "*/django-tui/tests"]
 
 [tool.coverage.report]
-exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
