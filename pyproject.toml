@@ -1,7 +1,7 @@
 [project]
 name = "django-tui"
 # CalVer: YY.N = the Nth release of 20YY (26.1, 26.2, ..., 27.1). Bumped by scripts/release.py.
-version = "24.5"
+version = "26.1"
 description = "Inspect and run Django Commands in a text-based user interface (TUI)."
 readme = "README.md"
 requires-python = ">=3.11"

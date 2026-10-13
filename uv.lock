@@ -60,7 +60,7 @@ wheels = [
 
 [[package]]
 name = "django-tui"
-version = "24.5"
+version = "26.1"
 source = { editable = "." }
 dependencies = [
     { name = "django", version = "5.2.18", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },

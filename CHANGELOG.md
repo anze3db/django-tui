@@ -11,6 +11,10 @@ prepared (see [RELEASING.md](https://github.com/anze3db/django-tui/blob/main/REL
 
 ## Unreleased
 
+## [26.1](https://github.com/anze3db/django-tui/releases/tag/26.1) - 2026-10-13
+
+### Highlights
+
 - **A new command screen.** Type a command and its arguments at the `$ python manage.py`
   prompt, like in your shell. The command name filters the list of commands, and the
   arguments fill in the form below, which updates the command in turn. Press enter to run
@@ -31,6 +35,24 @@ prepared (see [RELEASING.md](https://github.com/anze3db/django-tui/blob/main/REL
   with the same Python as the TUI.
 - Python 3.11 to 3.15 and Django 5.2, 6.0 and 6.1 are supported. Dropped Python 3.8 to 3.10,
   Django 3.2 to 5.1, and the Trogon and Click dependencies.
+
+### Changes
+
+* Fix unresponsive TUI on macOS and update supported versions
+* New command screen: type commands at a prompt and run them without leaving the TUI
+* Release with `just release`, like potatoq
+* New screenshots and demo in the README
+* Keep each release's README images in docs/images/<version>
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+
+
+**Full Changelog**: https://github.com/anze3db/django-tui/compare/24.5...26.1
+
+### Contributors
+
+Thank you to everyone who contributed to this release: @anze3db
 
 ## [24.5] - 2024-10-16
 
