@@ -65,15 +65,20 @@ check: lint test
 tui *args:
     cd tests && uv run python manage.py tui "$@"
 
-# Take the README's screenshots (needs Chrome)
+# Take the README's screenshots for the next version (needs Chrome)
 [group("docs")]
 screenshots:
     uv run python docs/screenshots.py
 
-# Record the README's demo (needs VHS: https://github.com/charmbracelet/vhs)
+# Record the README's demo for the next version (needs VHS: https://github.com/charmbracelet/vhs)
 [group("docs")]
 demo:
-    vhs docs/demo.tape
+    #!/usr/bin/env bash
+    set -euo pipefail
+    directory=$(uv run python docs/screenshots.py --version-dir)
+    mkdir -p "$directory"
+    vhs docs/demo.tape --output "$directory/demo.gif"
+    uv run python docs/screenshots.py --readme demo.gif
 
 # Preview the next release; `just release --no-dry-run` commits it (`--push`: push and wait for it)
 [group("release")]

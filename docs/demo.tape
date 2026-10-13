@@ -1,6 +1,5 @@
-# Records docs/images/demo.gif with VHS (https://github.com/charmbracelet/vhs): `just demo`
-
-Output docs/images/demo.gif
+# The README's demo, recorded with VHS (https://github.com/charmbracelet/vhs): `just demo` saves it as
+# docs/images/<next version>/demo.gif and points the README at it.
 
 Require uv
 Set Shell "bash"

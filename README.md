@@ -5,19 +5,19 @@ Inspect and run Django Commands in a text-based user interface (TUI), built with
 [![PyPI - Version](https://img.shields.io/pypi/v/django-tui.svg)](https://pypi.org/project/django-tui)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/django-tui.svg)](https://pypi.org/project/django-tui)
 
-![A demo of django-tui: filtering commands, filling in a command's options and running it, then querying models in the shell](https://raw.githubusercontent.com/anze3db/django-tui/main/docs/images/demo.gif)
+![A demo of django-tui: filtering commands, filling in a command's options and running it, then querying models in the shell](https://raw.githubusercontent.com/anze3db/django-tui/main/docs/images/26.1/demo.gif)
 
 ## Commands
 
 Type a command and its arguments, like in your shell, or fill in the form. Your project's commands are listed first.
 
-![The command screen with the closepoll command and its options](https://raw.githubusercontent.com/anze3db/django-tui/main/docs/images/commands.png)
+![The command screen with the closepoll command and its options](https://raw.githubusercontent.com/anze3db/django-tui/main/docs/images/26.1/commands.png)
 
 ## Shell
 
 Run ORM queries with your models and common Django helpers already imported.
 
-![The shell with a query and its result](https://raw.githubusercontent.com/anze3db/django-tui/main/docs/images/shell.png)
+![The shell with a query and its result](https://raw.githubusercontent.com/anze3db/django-tui/main/docs/images/26.1/shell.png)
 
 ## Installation
 
@@ -61,7 +61,7 @@ Open the interactive shell directly with `python manage.py tui --shell`. Press `
 
 ## Contributing
 
-You need [uv](https://docs.astral.sh/uv/) and [just](https://just.systems/). `just` lists the tasks: `just check` lints and runs the tests, `just test-all` runs them on every supported Python and Django, and `just tui` opens the TUI in the test project. `just screenshots` and `just demo` update the images above. Releases are described in [RELEASING.md](https://github.com/anze3db/django-tui/blob/main/RELEASING.md).
+You need [uv](https://docs.astral.sh/uv/) and [just](https://just.systems/). `just` lists the tasks: `just check` lints and runs the tests, `just test-all` runs them on every supported Python and Django, and `just tui` opens the TUI in the test project. `just screenshots` and `just demo` save the images above for the next version, in `docs/images/<version>/`, and point this README at them. Keep the old images: PyPI shows each release's README with that release's images. Releases are described in [RELEASING.md](https://github.com/anze3db/django-tui/blob/main/RELEASING.md).
 
 ## License
 
