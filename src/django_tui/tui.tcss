@@ -1,0 +1,309 @@
+* {
+  scrollbar-size-vertical: 1;
+  scrollbar-color: $primary 30%;
+  scrollbar-color-hover: $primary 60%;
+  scrollbar-color-active: $primary;
+  scrollbar-background: $surface;
+}
+
+/* Header */
+
+AppHeader {
+  dock: top;
+  height: 1;
+  background: $panel;
+}
+
+#app-title {
+  width: auto;
+  padding: 0 2;
+  color: $primary;
+  text-style: bold;
+}
+
+.mode-tab {
+  width: auto;
+  padding: 0 2;
+  color: $text-muted;
+}
+
+.mode-tab:hover {
+  background: $boost;
+  color: $text;
+}
+
+.mode-tab.-active {
+  background: $background;
+  color: $text;
+  text-style: bold;
+}
+
+#versions {
+  width: 1fr;
+  text-align: right;
+  color: $text-muted;
+}
+
+#about-link {
+  width: auto;
+  padding: 0 2;
+  color: $text-muted;
+}
+
+#about-link:hover {
+  color: $text;
+  text-style: underline;
+}
+
+/* Commands */
+
+#body {
+  height: 1fr;
+}
+
+#command-bar {
+  height: 3;
+  padding: 1 2;
+  background: $panel;
+}
+
+#prompt {
+  width: auto;
+  padding-right: 1;
+}
+
+#command-line {
+  width: 1fr;
+  background: $panel;
+}
+
+#command-line:focus {
+  background: $panel;
+}
+
+#command-bar Button {
+  margin-left: 2;
+}
+
+CommandList {
+  width: 34;
+  height: 1fr;
+  padding: 1 0 0 0;
+  border: none;
+  background: $surface;
+}
+
+.-narrow CommandList {
+  width: 26;
+}
+
+CommandList > .option-list--option {
+  padding: 0 2;
+}
+
+CommandList > .option-list--option-disabled {
+  color: $primary;
+  padding: 0 1;
+}
+
+CommandList > .option-list--option-highlighted {
+  background: $primary;
+  color: $background;
+  text-style: bold;
+}
+
+CommandList > .option-list--option-hover {
+  background: $boost;
+}
+
+CommandList > .option-list--separator {
+  color: $surface;
+}
+
+#main {
+  width: 1fr;
+}
+
+#command-header {
+  height: auto;
+  padding: 1 2 1 2;
+  border-bottom: hkey $panel;
+}
+
+#command-title {
+  color: $text;
+}
+
+#command-help {
+  color: $text-muted;
+}
+
+#command-status {
+  margin-top: 1;
+}
+
+#forms {
+  height: 1fr;
+}
+
+CommandForm {
+  padding: 0 2 1 2;
+}
+
+.section-title {
+  margin-top: 1;
+  color: $primary;
+  text-style: bold;
+}
+
+.section-title.empty {
+  color: $text-muted;
+  text-style: italic;
+}
+
+ParameterField {
+  layout: horizontal;
+  height: auto;
+  margin-top: 1;
+}
+
+ParameterField > .name {
+  width: 26;
+  padding-right: 2;
+}
+
+ParameterField > .body {
+  width: 1fr;
+  height: auto;
+}
+
+.-narrow ParameterField {
+  layout: vertical;
+}
+
+.-narrow ParameterField > .name {
+  width: 1fr;
+}
+
+.-narrow ParameterField.-flag > .body {
+  padding-left: 4;
+}
+
+ParameterField .help {
+  color: $text-muted;
+}
+
+ParameterField Input,
+ParameterField SelectCurrent {
+  background: $panel;
+}
+
+ParameterField Input:focus,
+ParameterField Select:focus > SelectCurrent {
+  background: $primary 25%;
+}
+
+ParameterField Select {
+  width: 1fr;
+}
+
+ParameterField.-flag > .body {
+  padding-left: 0;
+}
+
+ParameterField Checkbox {
+  background: transparent;
+  text-style: bold;
+}
+
+ParameterField Checkbox > .toggle--button {
+  color: $panel;
+  background: $panel;
+}
+
+ParameterField Checkbox.-on > .toggle--button {
+  color: $background;
+  background: $primary;
+}
+
+ParameterField Checkbox:focus {
+  background: $primary 25%;
+}
+
+CommandForm Collapsible {
+  margin-top: 1;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+CommandForm Collapsible > Contents {
+  padding: 0 0 0 2;
+}
+
+CommandForm CollapsibleTitle {
+  padding: 0;
+  color: $text-muted;
+  text-style: bold;
+}
+
+CommandForm CollapsibleTitle:focus {
+  background: $primary 25%;
+  color: $text;
+}
+
+/* Shell */
+
+#shell-body {
+  height: 1fr;
+  padding: 1 1 0 1;
+}
+
+#code,
+#output {
+  width: 1fr;
+  height: 1fr;
+  border: round $panel;
+  border-title-color: $text-muted;
+  border-subtitle-color: $text-muted;
+  background: $surface;
+}
+
+#code:focus,
+#output:focus {
+  border: round $primary;
+  border-title-color: $primary;
+}
+
+#output.-error {
+  border: round $error;
+}
+
+/* Dialogs */
+
+AboutDialog,
+DefaultImportsInfo,
+TextEditorBindingsInfo {
+  align: center middle;
+}
+
+.dialog {
+  width: auto;
+  max-width: 90%;
+  height: auto;
+  max-height: 80%;
+  padding: 1 2;
+  border: round $primary;
+  border-title-color: $primary;
+  border-title-style: bold;
+  border-subtitle-color: $text-muted;
+  background: $surface;
+}
+
+AboutDialog .dialog {
+  width: 64;
+}
+
+TextEditorBindingsInfo .dialog {
+  width: 90;
+}
