@@ -1,0 +1,92 @@
+[
+  {
+    "model": "polls.question",
+    "pk": 1,
+    "fields": {
+      "question_text": "What's new?",
+      "pub_date": "2026-10-13T12:00:00Z",
+      "is_open": true
+    }
+  },
+  {
+    "model": "polls.choice",
+    "pk": 1,
+    "fields": {
+      "question": 1,
+      "choice_text": "Not much",
+      "votes": 0
+    }
+  },
+  {
+    "model": "polls.choice",
+    "pk": 2,
+    "fields": {
+      "question": 1,
+      "choice_text": "The sky",
+      "votes": 0
+    }
+  },
+  {
+    "model": "polls.question",
+    "pk": 2,
+    "fields": {
+      "question_text": "Favourite Django feature?",
+      "pub_date": "2026-10-13T12:00:00Z",
+      "is_open": true
+    }
+  },
+  {
+    "model": "polls.choice",
+    "pk": 3,
+    "fields": {
+      "question": 2,
+      "choice_text": "The ORM",
+      "votes": 0
+    }
+  },
+  {
+    "model": "polls.choice",
+    "pk": 4,
+    "fields": {
+      "question": 2,
+      "choice_text": "The admin",
+      "votes": 0
+    }
+  },
+  {
+    "model": "polls.choice",
+    "pk": 5,
+    "fields": {
+      "question": 2,
+      "choice_text": "Management commands",
+      "votes": 0
+    }
+  },
+  {
+    "model": "polls.question",
+    "pk": 3,
+    "fields": {
+      "question_text": "Tabs or spaces?",
+      "pub_date": "2026-10-13T12:00:00Z",
+      "is_open": true
+    }
+  },
+  {
+    "model": "polls.choice",
+    "pk": 6,
+    "fields": {
+      "question": 3,
+      "choice_text": "Tabs",
+      "votes": 0
+    }
+  },
+  {
+    "model": "polls.choice",
+    "pk": 7,
+    "fields": {
+      "question": 3,
+      "choice_text": "Spaces",
+      "votes": 0
+    }
+  }
+]
