@@ -15,13 +15,24 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
+        django-version: ["5.2", "6.0", "6.1"]
+        exclude:
+          # Django 6.0+ requires Python 3.12+
+          - python-version: "3.11"
+            django-version: "6.0"
+          - python-version: "3.11"
+            django-version: "6.1"
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v4
+    - uses: actions/checkout@v5
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
       with:
-        python-version: "3.12"
+        python-version: ${{ matrix.python-version }}
         cache: "pip"
     - name: Install dependencies
       run: |
@@ -29,11 +40,11 @@ jobs:
         pip install hatch
     - name: Cache Hatch
       id: cache-hatch
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: /home/runner/.local/share/hatch/env/virtual/
-        key: ${{ runner.os }}-hatch
+        key: ${{ runner.os }}-hatch-${{ matrix.python-version }}-${{ matrix.django-version }}
     - name: Build
       run: hatch build
     - name: Test
-      run: hatch run test
+      run: hatch run all.py${{ matrix.python-version }}-${{ matrix.django-version }}:test

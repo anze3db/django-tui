@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Calendar Versioning](https://calver.org).
 
+## [Unreleased]
+
+### Fixed
+
+Unresponsive TUI with garbled input (e.g. `^[[B` showing up when pressing keys) on macOS when a management command imports `readline`. Commands are now loaded before the TUI starts. ([#8](https://github.com/anze3db/django-tui/issues/8))
+
+### Added
+
+Python 3.13, 3.14 and 3.15 support
+Django 5.2, 6.0 and 6.1 support
+
+### Removed
+
+Python 3.8, 3.9 and 3.10 support
+Django 3.2, 4.0, 4.1, 4.2, 5.0 and 5.1 support
+
 ## [24.5] - 2024-10-16
 
 ### Removed

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import shlex
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
 from webbrowser import open as open_url
@@ -41,6 +42,7 @@ from trogon.widgets.multiple_choice import NonFocusableVerticalScroll
 from django_tui.management.commands.ish import InteractiveShellScreen
 
 
+@lru_cache
 def introspect_django_commands() -> dict[str, CommandSchema]:
     groups = {}
     for name, app_name in get_commands().items():
@@ -392,7 +394,7 @@ class DjangoTui(App):
 
     def action_select_mode(self, mode_id: Literal["commands", "shell"]) -> None:
         if mode_id == "commands":
-            self.app.push_screen(DjangoCommandBuilder("pyhton manage.py", "Test command name"))
+            self.app.push_screen(DjangoCommandBuilder("python manage.py", "Test command name"))
 
         elif mode_id == "shell":
             self.app.push_screen(InteractiveShellScreen("Interactive Shell"))
@@ -413,5 +415,8 @@ class Command(BaseCommand):
         parser.add_argument("--shell", action="store_true", help="Open django shell")
 
     def handle(self, *args: Any, shell=False, **options: Any) -> None:
+        # Import all management commands before Textual takes over the terminal. Importing them can have
+        # side effects that break the TUI, e.g. `import readline` resets the terminal mode on macOS.
+        introspect_django_commands()
         app = DjangoTui(open_shell=shell)
         app.run()

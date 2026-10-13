@@ -395,7 +395,7 @@ class InteractiveShellScreen(Screen):
         if mode_id == "commands":
             from django_tui.management.commands.tui import DjangoCommandBuilder
 
-            self.app.push_screen(DjangoCommandBuilder("pyhton manage.py", "Test command name"))
+            self.app.push_screen(DjangoCommandBuilder("python manage.py", "Test command name"))
 
         elif mode_id == "shell":
             self.app.push_screen(InteractiveShellScreen("Interactive Shell"))
