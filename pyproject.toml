@@ -1,14 +1,12 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "django-tui"
-dynamic = ["version"]
-description = 'Inspect and run Django Commands in a text-based user interface (TUI).'
+# CalVer: YY.N = the Nth release of 20YY (26.1, 26.2, ..., 27.1). Bumped by scripts/release.py.
+version = "24.5"
+description = "Inspect and run Django Commands in a text-based user interface (TUI)."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
+license-files = ["LICENSE.txt"]
 keywords = ["django", "tui", "textual"]
 authors = [{ name = "Anže Pečar", email = "anze@pecar.me" }]
 classifiers = [
@@ -26,7 +24,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["django>=5.2", "textual>=0.64.0", "trogon>=0.6.0"]
+dependencies = ["django>=5.2", "textual>=6.0"]
 
 [project.urls]
 Documentation = "https://github.com/anze3db/django-tui#readme"
@@ -36,114 +34,33 @@ Changelog = "https://github.com/anze3db/django-tui/blob/main/CHANGELOG.md"
 Mastodon = "https://fosstodon.org/@anze3db"
 Twitter = "https://twitter.com/anze3db"
 
-[tool.hatch.version]
-path = "src/django_tui/__about__.py"
-
-[tool.hatch.envs.default]
-dependencies = ["coverage[toml]>=6.5", "pytest"]
-[tool.hatch.envs.default.scripts]
-test = "pytest {args:tests}"
-test-cov = "coverage run -m pytest {args:tests}"
-cov-report = ["- coverage combine", "coverage report"]
-cov = ["test-cov", "cov-report"]
-
-# Django 6.0+ requires Python 3.12+
-[[tool.hatch.envs.all.matrix]]
-python = ["3.11"]
-django = ["5.2"]
-
-[[tool.hatch.envs.all.matrix]]
-python = ["3.12", "3.13", "3.14", "3.15"]
-django = ["5.2", "6.0", "6.1"]
-
-[tool.hatch.envs.all.overrides]
-matrix.django.dependencies = [
-  { value = "django~=5.2.0", if = ["5.2"] },
-  { value = "django~=6.0.0", if = ["6.0"] },
-  { value = "django~=6.1.0", if = ["6.1"] },
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "ruff>=0.6",
 ]
 
-[tool.hatch.envs.lint]
-detached = true
-dependencies = ["mypy>=1.0.0", "ruff>=0.1.6"]
-[tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:src/django_tui tests}"
-style = ["ruff check {args:.}", "ruff format --check {args:.}"]
-fmt = ["ruff format {args:.}", "ruff check --fix {args:.}", "style"]
-all = ["style", "typing"]
+[build-system]
+requires = ["uv_build>=0.8.0,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = [
+  # Running a command exits a headless test app before the command line's suggestion is looked up
+  "ignore:coroutine 'Suggester._get_suggestion' was never awaited:RuntimeWarning",
+]
 
 [tool.ruff]
-target-version = "py311"
 line-length = 120
 
 [tool.ruff.lint]
-select = [
-  "A",
-  "ARG",
-  "B",
-  "C",
-  "DTZ",
-  "E",
-  "EM",
-  "F",
-  "FBT",
-  "I",
-  "ICN",
-  "ISC",
-  "N",
-  "PLC",
-  "PLE",
-  "PLR",
-  "PLW",
-  "Q",
-  "RUF",
-  "S",
-  "T",
-  "TID",
-  "UP",
-  "W",
-  "YTT",
-]
+extend-select = ["I"]
 ignore = [
-  # Allow non-abstract empty methods in abstract base classes
-  "B027",
-  # Allow boolean positional values in function calls, like `dict.get(... True)`
-  "FBT003",
-  # Ignore checks for possible passwords
-  "S105",
-  "S106",
-  "S107",
-  # Ignore complexity
-  "C901",
-  "PLR0911",
-  "PLR0912",
-  "PLR0913",
-  "PLR0915",
-]
-unfixable = [
-  # Don't touch unused imports
-  "F401",
+  "RUF012",  # Textual's BINDINGS are class attributes by design
+  "BLE001",  # The TUI catches whatever a project's commands raise, so that it keeps running
 ]
 
 [tool.ruff.lint.isort]
 known-first-party = ["django_tui"]
-
-[tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
-
-[tool.ruff.lint.per-file-ignores]
-# Tests can use magic values, assertions, and relative imports
-"tests/**/*" = ["PLR2004", "S101", "TID252"]
-
-[tool.coverage.run]
-source_pkgs = ["django_tui", "tests"]
-branch = true
-parallel = true
-omit = ["src/django_tui/__about__.py"]
-
-[tool.coverage.paths]
-django_tui = ["src/django_tui", "*/django-tui/src/django_tui"]
-tests = ["tests", "*/django-tui/tests"]
-
-[tool.coverage.report]
-exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]

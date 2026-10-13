@@ -1,0 +1,22 @@
+# Categories for GitHub's generated release notes (used by scripts/release.py and
+# the GitHub UI). A PR goes into the first category whose label it carries.
+changelog:
+  exclude:
+    labels:
+      - release
+      - skip-changelog
+  categories:
+    - title: 💥 Breaking changes
+      labels: [breaking]
+    - title: ✨ Features
+      labels: [feature, enhancement]
+    - title: 🐛 Fixes
+      labels: [bug, fix]
+    - title: ⚡ Performance
+      labels: [performance]
+    - title: 📚 Documentation
+      labels: [documentation, docs]
+    - title: 🧰 Maintenance
+      labels: [maintenance, dependencies, ci, chore]
+    - title: Other changes
+      labels: ["*"]

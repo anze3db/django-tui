@@ -1,0 +1,141 @@
+# Publishes a release when a version that isn't tagged yet lands on main (a "Release
+# YY.N" commit from scripts/release.py), once CI has passed on that very commit:
+#   tag -> build (sdist + wheel) -> PyPI via trusted publishing (with PEP 740
+#   attestations) -> GitHub release with the CHANGELOG.md section and the dists.
+# Every other commit stops after the version check. Run it by hand (workflow_dispatch)
+# on main to retry a release whose tag already exists.
+#
+# Triggered by CI finishing (workflow_run) rather than by the push, so nothing is
+# published unless every test passed. A workflow_run run's ref is the default branch,
+# which the release environment accepts; it checks out the commit CI tested.
+name: Release
+
+on:
+  workflow_run: # zizmor: ignore[dangerous-triggers] only acts on successful CI runs of pushes to this repo's main; never checks out PR code
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    # A pull request from a fork can have a branch called "main" too: only pushes count.
+    if: >-
+      github.event_name == 'workflow_dispatch' || (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_repository.full_name == github.repository
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.tag.outputs.release }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - id: version
+        run: echo "version=$(uv version --short)" >> "$GITHUB_OUTPUT"
+      - id: tag
+        name: Tag (new versions only)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          EVENT: ${{ github.event_name }}
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            if [ "$EVENT" = workflow_dispatch ]; then
+              echo "Tag $VERSION already exists; re-running the release."
+              echo "release=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "$VERSION is already released; nothing to do."
+              echo "release=false" >> "$GITHUB_OUTPUT"
+            fi
+            exit 0
+          fi
+          uv run --no-project python scripts/release.py notes "$VERSION" > /dev/null  # must have a changelog entry
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$VERSION" -f "sha=$SHA"
+          echo "release=true" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: tag
+    if: needs.tag.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ needs.tag.outputs.version }}
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv build
+      - name: Check the distributions
+        env:
+          VERSION: ${{ needs.tag.outputs.version }}
+        run: |
+          uvx twine check --strict dist/*
+          # The built wheel must import and report the tagged version.
+          uv run --isolated --no-project --with dist/*.whl python -c \
+            "import os, django_tui, sys; sys.exit(django_tui.__version__ != os.environ['VERSION'])"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  pypi:
+    needs: [tag, build]
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: https://pypi.org/project/django-tui/${{ needs.tag.outputs.version }}/
+    permissions:
+      id-token: write # trusted publishing + attestations; nothing else
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+
+  github-release:
+    needs: [tag, pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ needs.tag.outputs.version }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist/
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.tag.outputs.version }}
+        run: |
+          python3 scripts/release.py notes "$VERSION" > notes.md
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            gh release edit "$VERSION" --notes-file notes.md
+            gh release upload "$VERSION" dist/* --clobber
+          else
+            pre=""
+            case "$VERSION" in *a*) pre="--prerelease" ;; esac  # alphas: 26.1a1
+            gh release create "$VERSION" dist/* --title "$VERSION" --notes-file notes.md --verify-tag $pre
+          fi

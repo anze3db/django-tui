@@ -1,0 +1,44 @@
+# Opens a "Release YY.N" pull request: next CalVer version, CHANGELOG.md section
+# generated from merged PR titles + contributors. Merging it runs release.yml.
+#
+# Note: PRs opened with GITHUB_TOKEN don't trigger other workflows, so CI won't run on
+# the release PR (it only touches CHANGELOG.md, pyproject.toml and uv.lock; main is
+# already tested). Run `uv run scripts/release.py prepare` locally to get CI on it.
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Override the version (default: next CalVer, e.g. 26.2)"
+        required: false
+      prerelease:
+        description: "Alpha pre-release (26.2a1, 26.2a2, ...) instead of a final"
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Open release PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          gh auth setup-git  # push with GH_TOKEN; nothing is persisted in the checkout
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          pre=""; [ "$PRERELEASE" = "true" ] && pre="--pre"
+          uv run --no-project python scripts/release.py prepare --pr --from-remote $pre ${VERSION:+--version "$VERSION"}
