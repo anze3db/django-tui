@@ -1,14 +1,22 @@
+# One pull request a month, on the 1st, that bumps everything: the GitHub Actions
+# and the uv.lock dependencies share a multi-ecosystem group, so they land together.
+# Security updates still open on their own, as soon as an advisory is published.
 version: 2
+
+multi-ecosystem-groups:
+  monthly:
+    schedule:
+      interval: cron
+      cronjob: "0 6 1 * *" # 06:00 UTC on the 1st
+    labels: [dependencies]
+
 updates:
   - package-ecosystem: github-actions
     directory: /
-    schedule: { interval: monthly }
-    labels: [dependencies]
-    groups:
-      actions: { patterns: ["*"] }
+    patterns: ["*"]
+    multi-ecosystem-group: monthly
+
   - package-ecosystem: uv
     directory: /
-    schedule: { interval: monthly }
-    labels: [dependencies]
-    groups:
-      python: { patterns: ["*"] }
+    patterns: ["*"]
+    multi-ecosystem-group: monthly
