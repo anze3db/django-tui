@@ -24,7 +24,10 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["django>=5.2", "textual>=6.0"]
+dependencies = ["django>=5.2", "python-dotenv>=1.0", "textual>=6.0"]
+
+[project.scripts]
+django-tui = "django_tui.cli:main"
 
 [project.urls]
 Documentation = "https://github.com/anze3db/django-tui#readme"

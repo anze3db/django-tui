@@ -19,6 +19,18 @@ Run ORM queries with your models and common Django helpers already imported.
 
 ![The shell with a query and its result](https://raw.githubusercontent.com/anze3db/django-tui/main/docs/images/26.1/shell.png)
 
+## Try it without installing
+
+Run django-tui with [uv](https://docs.astral.sh/uv/) in your project's directory, or any directory inside it:
+
+```console
+uvx django-tui
+```
+
+It finds your project's `manage.py`, loads the `.env` files in the project's directory and its parents (variables that are already set win), and uses the project's virtual environment: the active one, or a `.venv`, `venv` or `env` directory in the project or its parents. Arguments work like they do for `python manage.py tui`, e.g. `uvx django-tui --shell` or `uvx django-tui --settings=mysite.settings.local`.
+
+If your virtual environment is somewhere else, like with Poetry, activate it first, e.g. `poetry run uvx django-tui`.
+
 ## Installation
 
 ```console
