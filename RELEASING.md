@@ -21,25 +21,26 @@ Release notes list what changed since the last release:
 
 ## Cutting a release
 
-1. **Prepare**, on an up-to-date `main` with a clean working tree:
+1. **Preview**, on an up-to-date `main` with a clean working tree:
 
    ```console
-   $ just release                  # preview: the version and its changelog section
-   $ just release --no-dry-run     # commit "Release 26.1" on main
+   $ just release                  # the next version and its changelog section
+   $ just release --no-dry-run     # release it: commit "Release 26.1", push, wait
    ```
 
    This runs `uv run scripts/release.py prepare` (other arguments are passed on). It
    computes the next version, writes the changelog section (the **Unreleased** notes as
    highlights, the merged PRs or else the commits since the last release, and everyone
    who contributed: commit authors and `Co-authored-by` trailers, bots excluded), bumps
-   `pyproject.toml` and `uv.lock`, and commits **"Release 26.N"**. Look at the commit,
-   amend `CHANGELOG.md` if you like.
+   `pyproject.toml` and `uv.lock`, and commits **"Release 26.N"**. The dry run
+   prints exactly that section, so edit **Unreleased** (or PR titles) until it reads
+   right.
 
-2. **Push it**: `git push`. That's the release. Or push in step 1 with
-   `just release --no-dry-run --push`, which then waits for CI and the Release workflow
-   and ends with ✅ and the PyPI and GitHub release links, or ❌ and the failed run's link
-   (`--no-wait` skips the waiting; Ctrl+C stops it, the release goes ahead). After a
-   plain `git push`, `uv run scripts/release.py wait` does the same waiting.
+2. **Release**: `just release --no-dry-run` does the same for real, pushes the commit to
+   `main`, and waits for CI and the Release workflow. It ends with ✅ and the PyPI and
+   GitHub release links, or ❌ and the failed run's link. `--no-wait` skips the waiting;
+   Ctrl+C stops it, and the release goes ahead anyway. `uv run scripts/release.py wait`
+   picks the waiting up again.
 
 3. **Done, once CI passes.** `.github/workflows/release.yml` runs when the CI workflow
    finishes successfully for a push to `main`, on the commit CI tested. If the version

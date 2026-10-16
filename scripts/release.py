@@ -1,7 +1,7 @@
 """Release tooling: CalVer versions, changelog generation, release commits.
 
-    uv run scripts/release.py prepare            # commit "Release 26.N" on main; then `git push`
-    uv run scripts/release.py prepare --push     # ... push it, and wait for CI and the release
+    uv run scripts/release.py prepare            # commit "Release 26.N", push it, wait for CI and the release
+    uv run scripts/release.py prepare --no-wait  # ... and don't wait
     uv run scripts/release.py wait               # wait for the release of a pushed HEAD
     uv run scripts/release.py prepare --pre      # an alpha instead: 26.3a1, 26.3a2, ...
     uv run scripts/release.py prepare --dry-run  # print the changelog section, change nothing
@@ -22,7 +22,8 @@ writes it all into CHANGELOG.md. The same text becomes the GitHub release body.
 Pushing the release commit to main publishes it, once CI has passed on that commit
 (.github/workflows/release.yml).
 
-Standard library only, so it runs anywhere `gh` is installed and authenticated.
+Standard library only, so it runs anywhere `gh` is installed and authenticated. It only
+uses GitHub's REST API (`gh api`, `gh run`): some environments block GraphQL.
 """
 
 from __future__ import annotations
@@ -181,8 +182,19 @@ def gh_json(*args: str) -> object:
     return json.loads(run("gh", *args))
 
 
+def repo_from_url(url: str) -> str | None:
+    """``owner/name`` from a remote URL: https, ssh, or a proxy that keeps the path."""
+    m = re.search(r"[/:]([^/:]+/[^/]+?)(?:\.git)?/?$", url)
+    return m[1] if m else None
+
+
 def repo_name() -> str:
-    return run("gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner")
+    """The origin remote's repository (not `gh repo view`, which needs GraphQL)."""
+    url = run("git", "remote", "get-url", "origin")
+    repo = repo_from_url(url)
+    if not repo:
+        raise SystemExit(f"Can't tell the GitHub repository from origin ({url}): pass --repo owner/name")
+    return repo
 
 
 def has_pr_entries(generated: str) -> bool:
@@ -348,37 +360,37 @@ def cmd_prepare(args: argparse.Namespace) -> None:
     run("git", "add", "CHANGELOG.md", "pyproject.toml", "uv.lock")
     run("git", "commit", "-m", f"Release {version}", capture=False)
     if not args.pr:
-        if args.push:
-            run("git", "push", "origin", f"HEAD:{target}", capture=False)
-            print(f"Pushed. {version} is published once CI passes on it (Actions → Release).")
-            if not args.no_wait:
-                wait_for_release(repo, run("git", "rev-parse", "HEAD"), version)
-        else:
-            print(f"Committed Release {version}. Push it to publish (once CI passes): git push origin {target}")
+        run("git", "push", "origin", f"HEAD:{target}", capture=False)
+        print(f"Pushed. {version} is published once CI passes on it (Actions → Release).")
+        if not args.no_wait:
+            wait_for_release(repo, run("git", "rev-parse", "HEAD"), version)
         return
     run("git", "push", "-u", "origin", f"release/{version}", capture=False)
     body = (
         f"Merging this PR publishes **{version}** to PyPI and creates the GitHub release "
         f"(.github/workflows/release.yml).\n\n---\n\n{section}"
     )
-    run(
-        "gh", "pr", "create", "--base", target, "--head", f"release/{version}",
-        "--title", f"Release {version}", "--label", "release", "--body", body, capture=False,
+    # The REST API rather than `gh pr create`, which needs GraphQL.
+    pr = gh_json(
+        "api", "-X", "POST", f"repos/{repo}/pulls", "-f", f"title=Release {version}",
+        "-f", f"head=release/{version}", "-f", f"base={target}", "-f", f"body={body}",
     )  # fmt: skip
+    number, url = pr["number"], pr["html_url"]  # type: ignore[index]
+    gh_json("api", "-X", "POST", f"repos/{repo}/issues/{number}/labels", "-f", "labels[]=release")
+    print(f"Opened {url}")
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
-    p = sub.add_parser("prepare", help="Bump the version, write CHANGELOG.md and commit the release")
+    p = sub.add_parser("prepare", help="Bump the version, write CHANGELOG.md, commit and push the release")
     p.add_argument("--version", help="Override the computed CalVer version")
     p.add_argument("--target", default="main", help="Branch to release from")
-    p.add_argument("--repo", help="owner/name (default: the current gh repo)")
+    p.add_argument("--repo", help="owner/name (default: from the origin remote)")
     p.add_argument("--from-remote", action="store_true", help="Branch off origin/<target> (CI)")
     p.add_argument("--pre", action="store_true", help="Release the next alpha (e.g. 26.2a1) instead of a final")
     p.add_argument("--dry-run", action="store_true")
-    p.add_argument("--push", action="store_true", help="Push the release commit (it publishes once CI passes)")
-    p.add_argument("--no-wait", action="store_true", help="With --push: don't wait for CI and the release")
+    p.add_argument("--no-wait", action="store_true", help="Push, but don't wait for CI and the release")
     p.add_argument("--pr", action="store_true", help="Open a release PR instead of committing to the branch")
     p.set_defaults(func=cmd_prepare)
     nv = sub.add_parser("next-version")
@@ -387,7 +399,7 @@ def main(argv: list[str] | None = None) -> None:
     w = sub.add_parser("wait", help="Wait for CI and the release of a pushed commit")
     w.add_argument("commit", nargs="?", default="HEAD")
     w.add_argument("--version", help="Default: the version in that commit's pyproject.toml")
-    w.add_argument("--repo", help="owner/name (default: the current gh repo)")
+    w.add_argument("--repo", help="owner/name (default: from the origin remote)")
     w.set_defaults(func=cmd_wait)
     n = sub.add_parser("notes")
     n.add_argument("version")
