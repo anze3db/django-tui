@@ -157,6 +157,20 @@ def test_enter_runs_with_defaults():
     assert run_app(test) == ["migrate"]
 
 
+def test_form_timer_firing_after_the_tui_closes():
+    async def run():
+        app = DjangoTui()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause()
+            await pilot.press(*"migr")
+            screen = app.screen
+            await pilot.press("enter")
+        await screen._show_form(screen.command)
+        return app.return_value
+
+    assert asyncio.run(run()) == ["migrate"]
+
+
 def test_enter_on_empty_command_line_does_nothing():
     async def test(app, pilot):
         await pilot.press("enter")

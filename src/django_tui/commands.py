@@ -416,9 +416,11 @@ class CommandsScreen(Screen):
         return forms.first(CommandForm) if forms else None
 
     async def _show_form(self, command: Command) -> None:
-        if command is not self.command:
+        switchers = self.query(ContentSwitcher)
+        # The timer can fire while the TUI is closing, after the forms' container was removed
+        if command is not self.command or not switchers or not switchers.first().is_attached:
             return
-        switcher = self.query_one(ContentSwitcher)
+        switcher = switchers.first()
         if self._find_form(command) is None:
             await switcher.mount(CommandForm(command, self._values[command.name], id=self._form_id(command)))
         switcher.current = self._form_id(command)
