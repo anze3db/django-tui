@@ -11,8 +11,27 @@ prepared (see [RELEASING.md](https://github.com/anze3db/django-tui/blob/main/REL
 
 ## Unreleased
 
+## [26.2](https://github.com/anze3db/django-tui/releases/tag/26.2) - 2026-10-23
+
+### Highlights
+
 - **Run django-tui without installing it** with `uvx django-tui` in your project's directory.
   It finds the project's `manage.py`, loads its `.env` files and uses its virtual environment.
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+### What's Changed
+#### 🧰 Maintenance
+* Bump the "monthly" group with 1 update across multiple ecosystems by @dependabot[bot] in https://github.com/anze3db/django-tui/pull/10
+
+### New Contributors
+* @dependabot[bot] made their first contribution in https://github.com/anze3db/django-tui/pull/10
+
+**Full Changelog**: https://github.com/anze3db/django-tui/compare/26.1...26.2
+
+### Contributors
+
+Thank you to everyone who contributed to this release: @anze3db
 
 ## [26.1](https://github.com/anze3db/django-tui/releases/tag/26.1) - 2026-10-13
 
