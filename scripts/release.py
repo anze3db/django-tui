@@ -170,6 +170,17 @@ def contributors_from_commits(commits: list[dict]) -> list[str]:
     return list(seen)
 
 
+def drop_bot_new_contributors(generated: str) -> str:
+    """Remove bots from the "New Contributors" of GitHub's generated notes, and the heading if no one is left."""
+    lines = [
+        line
+        for line in generated.splitlines()
+        if not (m := re.match(r"\* @(\S+) made their first contribution", line.strip())) or not BOTS.search(m[1])
+    ]
+    text = "\n".join(lines)
+    return re.sub(r"## New Contributors\n+(?=##|\*\*|$)", "", text).strip()
+
+
 # --- GitHub / git plumbing ------------------------------------------------------
 
 
@@ -328,7 +339,7 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         check_releasable(target)
     changelog = CHANGELOG.read_text()
     highlights, changelog = split_unreleased(changelog)
-    generated = generated_notes(repo, version, previous, target)
+    generated = drop_bot_new_contributors(generated_notes(repo, version, previous, target))
     if not has_pr_entries(generated):
         # Pushed straight to main: list the commits instead of (nonexistent) PRs.
         changes = commit_notes(commit_subjects(previous, f"origin/{target}" if args.from_remote else "HEAD"))

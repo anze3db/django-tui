@@ -146,6 +146,22 @@ def test_repository_changelog_and_version_agree():
     assert highlights or release.extract_section((root / "CHANGELOG.md").read_text(), version)
 
 
+def test_drop_bot_new_contributors():
+    notes = (
+        "## What's Changed\n* Bump by @dependabot[bot] in https://x/pull/10\n\n"
+        "## New Contributors\n* @dependabot[bot] made their first contribution in https://x/pull/10\n\n"
+        "**Full Changelog**: https://x/compare/26.1...26.2"
+    )
+    assert release.drop_bot_new_contributors(notes) == (
+        "## What's Changed\n* Bump by @dependabot[bot] in https://x/pull/10\n\n"
+        "**Full Changelog**: https://x/compare/26.1...26.2"
+    )
+    assert release.drop_bot_new_contributors(
+        "## New Contributors\n* @alice made their first contribution in https://x/pull/3\n"
+        "* @renovate[bot] made their first contribution in https://x/pull/4"
+    ) == ("## New Contributors\n* @alice made their first contribution in https://x/pull/3")
+
+
 def test_commit_notes_stand_in_for_prs():
     assert release.has_pr_entries("## What's Changed\n* Retry Redis by @a in https://x/pull/3")
     assert not release.has_pr_entries("**Full Changelog**: https://x/compare/26.1...26.2")
